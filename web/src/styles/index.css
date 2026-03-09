@@ -15,10 +15,12 @@
   --negative: #dc2626;
   --negative-bg: #fef2f2;
   --gold: #b45309;
-  --font: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+  --font:
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  --mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
   --radius: 8px;
   --radius-lg: 12px;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -342,6 +344,12 @@ button {
 /* === Calculate button === */
 .calculate-button-wrapper {
   margin: 24px 0;
+  text-align: center;
+}
+.calc-estimate-hint {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
   text-align: center;
 }
 

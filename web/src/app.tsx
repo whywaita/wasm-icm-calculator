@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { useI18n } from "./hooks/useI18n";
 import { useEngine } from "./hooks/useEngine";
 import { Header } from "./components/Header";
@@ -15,6 +15,7 @@ import { PressureCurveChart } from "./components/PressureCurveChart";
 import { MttSimpleMode } from "./components/MttSimpleMode";
 import type { MttSimpleState } from "./components/MttSimpleMode";
 import { generateMttPayouts, MTT_PAYOUT_PRESETS } from "./utils/mttPayouts";
+import { estimateCalcTime } from "./utils/estimateTime";
 import type {
   PlayerInput as PlayerInputType,
   PrizeStructure,
@@ -74,7 +75,8 @@ export function App() {
     useState<BreakevenFormState>(DEFAULT_BREAKEVEN);
   const [breakevenEnabled, setBreakevenEnabled] = useState(false);
 
-  const [mttSimple, setMttSimple] = useState<MttSimpleState>(DEFAULT_MTT_SIMPLE);
+  const [mttSimple, setMttSimple] =
+    useState<MttSimpleState>(DEFAULT_MTT_SIMPLE);
 
   const showBounty = tournamentType === "bounty" || tournamentType === "pko";
 
@@ -126,9 +128,7 @@ export function App() {
     const opponentStack =
       opponentCount > 0 ? (totalChips - s.myStack) / opponentCount : 0;
 
-    const mttPlayers: PlayerInputType[] = [
-      { name: "You", stack: s.myStack },
-    ];
+    const mttPlayers: PlayerInputType[] = [{ name: "You", stack: s.myStack }];
     for (let i = 0; i < opponentCount; i++) {
       mttPlayers.push({
         name: `Opponent ${i + 1}`,
@@ -157,6 +157,23 @@ export function App() {
 
   const breakevenEntryFee = result?.players[0]?.breakeven?.entryFee;
   const isSimple = inputMode === "mttSimple";
+
+  const estimatedPlayerCount =
+    inputMode === "mttSimple" ? mttSimple.remainingPlayers : players.length;
+
+  const estimateHint = useMemo(() => {
+    const est = estimateCalcTime(estimatedPlayerCount);
+    const keyMap: Record<string, Record<string, string>> = {
+      exact: { instant: "estimateExactInstant" },
+      approximate: {
+        fast: "estimateApproxFast",
+        moderate: "estimateApproxModerate",
+        slow: "estimateApproxSlow",
+      },
+    };
+    const i18nKey = keyMap[est.algorithm]?.[est.timeKey];
+    return i18nKey ? t(i18nKey) : undefined;
+  }, [estimatedPlayerCount, t]);
 
   return (
     <div class="container">
@@ -226,7 +243,12 @@ export function App() {
         </>
       )}
 
-      <CalculateButton t={t} isLoading={isLoading} onClick={handleCalculate} />
+      <CalculateButton
+        t={t}
+        isLoading={isLoading}
+        onClick={handleCalculate}
+        estimateHint={estimateHint}
+      />
 
       {error && <div class="error-message">{error}</div>}
 

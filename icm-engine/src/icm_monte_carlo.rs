@@ -110,6 +110,39 @@ mod tests {
     }
 
     #[test]
+    fn test_twenty_players_completes() {
+        // 20 players with 15 payout positions (Simple MTT default).
+        // This must use Monte Carlo and complete without freezing.
+        let stacks: Vec<f64> = (1..=20).map(|i| i as f64 * 1000.0).collect();
+        let payouts: Vec<f64> = (0..15).map(|i| (15 - i) as f64 * 100.0).collect();
+        let equities = compute_equity_monte_carlo(&stacks, &payouts, 100_000);
+        let sum: f64 = equities.iter().sum();
+        let prize_pool: f64 = payouts.iter().sum();
+        assert!(
+            (sum - prize_pool).abs() < 5.0,
+            "Sum of equities should be close to prize pool: {} vs {}",
+            sum,
+            prize_pool
+        );
+        // Player with largest stack should have highest equity
+        assert!(equities[19] > equities[0]);
+    }
+
+    #[test]
+    fn test_eleven_players_mc() {
+        // 11 players is just above the exact threshold; must use approximate.
+        let stacks: Vec<f64> = (1..=11).map(|i| i as f64 * 1000.0).collect();
+        let payouts = vec![50.0, 30.0, 20.0];
+        let equities = compute_equity_monte_carlo(&stacks, &payouts, 100_000);
+        let sum: f64 = equities.iter().sum();
+        assert!(
+            (sum - 100.0).abs() < 1.0,
+            "Sum of equities should be close to prize pool: {}",
+            sum
+        );
+    }
+
+    #[test]
     fn test_mc_close_to_exact() {
         let stacks = vec![5000.0, 3000.0, 2000.0];
         let payouts = vec![50.0, 30.0, 20.0];

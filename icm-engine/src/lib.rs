@@ -11,7 +11,7 @@ pub mod validation;
 
 use types::{CalculationInput, CalculationResult, ErrorResponse, ResultMetadata, TournamentType};
 
-const EXACT_PLAYER_THRESHOLD: usize = 20;
+const EXACT_PLAYER_THRESHOLD: usize = 10;
 const DEFAULT_MC_ITERATIONS: u32 = 100_000;
 
 #[wasm_bindgen(start)]
