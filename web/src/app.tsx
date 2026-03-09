@@ -12,6 +12,9 @@ import { ResultsTable } from "./components/ResultsTable";
 import { MetadataBar } from "./components/MetadataBar";
 import { EquityChart } from "./components/EquityChart";
 import { PressureCurveChart } from "./components/PressureCurveChart";
+import { MttSimpleMode } from "./components/MttSimpleMode";
+import type { MttSimpleState } from "./components/MttSimpleMode";
+import { generateMttPayouts, MTT_PAYOUT_PRESETS } from "./utils/mttPayouts";
 import type {
   PlayerInput as PlayerInputType,
   PrizeStructure,
@@ -19,6 +22,8 @@ import type {
   BreakevenFormState,
   CalculationInput,
 } from "./types";
+
+type InputMode = "advanced" | "mttSimple";
 
 const DEFAULT_PLAYERS: PlayerInputType[] = [
   { name: "Player 1", stack: 5000, bounty: 10 },
@@ -42,10 +47,21 @@ const DEFAULT_BREAKEVEN: BreakevenFormState = {
   startingChips: 10000,
 };
 
+const DEFAULT_MTT_SIMPLE: MttSimpleState = {
+  entryFee: 110,
+  rakePct: 10,
+  startingChips: 10000,
+  totalEntries: 100,
+  remainingPlayers: 20,
+  myStack: 50000,
+  payoutPresetKey: "top15",
+};
+
 export function App() {
   const { t, lang, setLang } = useI18n();
   const { calculate, isLoading, error, result } = useEngine();
 
+  const [inputMode, setInputMode] = useState<InputMode>("advanced");
   const [tournamentType, setTournamentType] = useState<
     "standard" | "bounty" | "pko"
   >("standard");
@@ -58,9 +74,19 @@ export function App() {
     useState<BreakevenFormState>(DEFAULT_BREAKEVEN);
   const [breakevenEnabled, setBreakevenEnabled] = useState(false);
 
+  const [mttSimple, setMttSimple] = useState<MttSimpleState>(DEFAULT_MTT_SIMPLE);
+
   const showBounty = tournamentType === "bounty" || tournamentType === "pko";
 
   const handleCalculate = () => {
+    if (inputMode === "mttSimple") {
+      handleMttSimpleCalculate();
+    } else {
+      handleAdvancedCalculate();
+    }
+  };
+
+  const handleAdvancedCalculate = () => {
     const input: CalculationInput = {
       tournamentType,
       players,
@@ -82,42 +108,123 @@ export function App() {
     calculate(input);
   };
 
+  const handleMttSimpleCalculate = () => {
+    const s = mttSimple;
+    const rake = s.entryFee * (s.rakePct / 100);
+    const buyIn = s.entryFee - rake;
+    const prizePool = buyIn * s.totalEntries;
+    const totalChips = s.startingChips * s.totalEntries;
+
+    const selectedPreset = MTT_PAYOUT_PRESETS.find(
+      (p) => p.key === s.payoutPresetKey,
+    );
+    const topPercent = selectedPreset?.topPercent ?? 15;
+    const payouts = generateMttPayouts(s.totalEntries, topPercent);
+
+    // Build players: "You" + equal-stack opponents
+    const opponentCount = s.remainingPlayers - 1;
+    const opponentStack =
+      opponentCount > 0 ? (totalChips - s.myStack) / opponentCount : 0;
+
+    const mttPlayers: PlayerInputType[] = [
+      { name: "You", stack: s.myStack },
+    ];
+    for (let i = 0; i < opponentCount; i++) {
+      mttPlayers.push({
+        name: `Opponent ${i + 1}`,
+        stack: opponentStack,
+      });
+    }
+
+    const input: CalculationInput = {
+      tournamentType: "standard",
+      players: mttPlayers,
+      prizeStructure: {
+        type: "percentage",
+        payouts,
+        totalPrizePool: prizePool,
+      },
+      breakeven: {
+        entryFee: s.entryFee,
+        buyIn,
+        rake,
+        startingChips: s.startingChips,
+      },
+    };
+
+    calculate(input);
+  };
+
   const breakevenEntryFee = result?.players[0]?.breakeven?.entryFee;
+  const isSimple = inputMode === "mttSimple";
 
   return (
     <div class="container">
       <Header t={t} lang={lang} setLang={setLang} />
 
-      <TournamentTypeSelector
-        t={t}
-        value={tournamentType}
-        onChange={setTournamentType}
-      />
+      {/* Input Mode Toggle */}
+      <div class="card">
+        <div class="card-label">{t("inputMode")}</div>
+        <div class="pill-group">
+          <label class={inputMode === "advanced" ? "active" : ""}>
+            <input
+              type="radio"
+              name="inputMode"
+              value="advanced"
+              checked={inputMode === "advanced"}
+              onChange={() => setInputMode("advanced")}
+            />
+            {t("modeAdvanced")}
+          </label>
+          <label class={inputMode === "mttSimple" ? "active" : ""}>
+            <input
+              type="radio"
+              name="inputMode"
+              value="mttSimple"
+              checked={inputMode === "mttSimple"}
+              onChange={() => setInputMode("mttSimple")}
+            />
+            {t("modeMttSimple")}
+          </label>
+        </div>
+      </div>
 
-      <PlayerInput
-        t={t}
-        players={players}
-        showBounty={showBounty}
-        onUpdate={setPlayers}
-      />
+      {isSimple ? (
+        <MttSimpleMode t={t} state={mttSimple} onUpdate={setMttSimple} />
+      ) : (
+        <>
+          <TournamentTypeSelector
+            t={t}
+            value={tournamentType}
+            onChange={setTournamentType}
+          />
 
-      <PayoutStructure
-        t={t}
-        prizeStructure={prizeStructure}
-        onUpdate={setPrizeStructure}
-      />
+          <PlayerInput
+            t={t}
+            players={players}
+            showBounty={showBounty}
+            onUpdate={setPlayers}
+          />
 
-      {tournamentType === "pko" && (
-        <PkoSettings t={t} config={pkoConfig} onUpdate={setPkoConfig} />
+          <PayoutStructure
+            t={t}
+            prizeStructure={prizeStructure}
+            onUpdate={setPrizeStructure}
+          />
+
+          {tournamentType === "pko" && (
+            <PkoSettings t={t} config={pkoConfig} onUpdate={setPkoConfig} />
+          )}
+
+          <BreakevenInput
+            t={t}
+            breakeven={breakeven}
+            onUpdate={setBreakeven}
+            open={breakevenEnabled}
+            onToggle={setBreakevenEnabled}
+          />
+        </>
       )}
-
-      <BreakevenInput
-        t={t}
-        breakeven={breakeven}
-        onUpdate={setBreakeven}
-        open={breakevenEnabled}
-        onToggle={setBreakevenEnabled}
-      />
 
       <CalculateButton t={t} isLoading={isLoading} onClick={handleCalculate} />
 
@@ -133,14 +240,14 @@ export function App() {
           <ResultsTable
             t={t}
             players={result.players}
-            showBounty={showBounty}
+            showBounty={!isSimple && showBounty}
             showBreakeven={!!result.players[0]?.breakeven}
           />
 
           <EquityChart
             t={t}
             players={result.players}
-            showBounty={showBounty}
+            showBounty={!isSimple && showBounty}
             entryFee={breakevenEntryFee}
           />
 
