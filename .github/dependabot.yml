@@ -4,11 +4,46 @@ updates:
     directory: "/icm-engine"
     schedule:
       interval: "weekly"
+    groups:
+      wasm:
+        patterns:
+          - "wasm-bindgen"
+          - "js-sys"
+          - "console_error_panic_hook"
+      serde:
+        patterns:
+          - "serde"
+          - "serde_json"
+      rand:
+        patterns:
+          - "rand"
+          - "getrandom"
+      testing:
+        dependency-type: "development"
+        patterns:
+          - "proptest"
 
   - package-ecosystem: "npm"
     directory: "/web"
     schedule:
       interval: "weekly"
+    groups:
+      chartjs:
+        patterns:
+          - "chart.js"
+          - "chartjs-plugin-annotation"
+      preact:
+        patterns:
+          - "preact"
+          - "@preact/*"
+      vite:
+        patterns:
+          - "vite"
+          - "vite-plugin-*"
+      testing:
+        patterns:
+          - "vitest"
+          - "happy-dom"
 
   - package-ecosystem: "github-actions"
     directory: "/"
