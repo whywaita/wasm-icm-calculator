@@ -22,8 +22,7 @@ export function PkoSettings({ t, config, onUpdate }: PkoSettingsProps) {
             onUpdate({
               inheritanceRate:
                 parseFloat((e.target as HTMLInputElement).value) || 0.5,
-            })
-          }
+            })}
         />
         <span
           style={{ fontSize: "0.92rem", color: "var(--text-tertiary)" }}

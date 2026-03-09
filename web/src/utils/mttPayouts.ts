@@ -20,7 +20,7 @@ export function generateMttPayouts(
 
   const totalWeight = weights.reduce((s, w) => s + w, 0);
   const payouts = weights.map((w) =>
-    Math.round((w / totalWeight) * 10000) / 100,
+    Math.round((w / totalWeight) * 10000) / 100
   );
 
   // Adjust rounding so percentages sum to exactly 100

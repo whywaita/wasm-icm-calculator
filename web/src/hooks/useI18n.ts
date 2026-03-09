@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import en from "../i18n/en.json";
 import ja from "../i18n/ja.json";
 

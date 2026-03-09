@@ -13,7 +13,7 @@ export function CsvInput({ t, showBounty, players, onUpdate }: CsvInputProps) {
     .map((p) =>
       showBounty
         ? `${p.name},${p.stack},${p.bounty ?? 10}`
-        : `${p.name},${p.stack}`,
+        : `${p.name},${p.stack}`
     )
     .join("\n");
 

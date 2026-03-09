@@ -1,5 +1,5 @@
 // web/src/worker.test.ts
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 // Test the validation error detection logic that lives in the worker
 describe("worker validation error detection", () => {

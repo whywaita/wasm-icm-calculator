@@ -170,7 +170,7 @@ fn error_fewer_than_2_players() {
 }
 
 #[test]
-fn error_more_than_50_players() {
+fn allow_more_than_50_players() {
     let mut input = valid_standard_input();
     input.players = (0..51)
         .map(|_| PlayerInput {
@@ -179,11 +179,20 @@ fn error_more_than_50_players() {
             bounty: None,
         })
         .collect();
-    let errors = validate(&input).unwrap_err();
-    assert!(errors.iter().any(|e| e.field == "players"));
-    assert!(errors
-        .iter()
-        .any(|e| e.message.contains("Maximum 50 players")));
+    assert!(validate(&input).is_ok());
+}
+
+#[test]
+fn allow_100_players() {
+    let mut input = valid_standard_input();
+    input.players = (0..100)
+        .map(|_| PlayerInput {
+            name: None,
+            stack: 1000.0,
+            bounty: None,
+        })
+        .collect();
+    assert!(validate(&input).is_ok());
 }
 
 #[test]

@@ -17,11 +17,11 @@ import type { MttSimpleState } from "./components/MttSimpleMode";
 import { generateMttPayouts, MTT_PAYOUT_PRESETS } from "./utils/mttPayouts";
 import { estimateCalcTime } from "./utils/estimateTime";
 import type {
-  PlayerInput as PlayerInputType,
-  PrizeStructure,
-  PkoConfig,
   BreakevenFormState,
   CalculationInput,
+  PkoConfig,
+  PlayerInput as PlayerInputType,
+  PrizeStructure,
 } from "./types";
 
 type InputMode = "advanced" | "mttSimple";
@@ -71,12 +71,14 @@ export function App() {
     DEFAULT_PRIZE_STRUCTURE,
   );
   const [pkoConfig, setPkoConfig] = useState<PkoConfig>(DEFAULT_PKO_CONFIG);
-  const [breakeven, setBreakeven] =
-    useState<BreakevenFormState>(DEFAULT_BREAKEVEN);
+  const [breakeven, setBreakeven] = useState<BreakevenFormState>(
+    DEFAULT_BREAKEVEN,
+  );
   const [breakevenEnabled, setBreakevenEnabled] = useState(false);
 
-  const [mttSimple, setMttSimple] =
-    useState<MttSimpleState>(DEFAULT_MTT_SIMPLE);
+  const [mttSimple, setMttSimple] = useState<MttSimpleState>(
+    DEFAULT_MTT_SIMPLE,
+  );
 
   const showBounty = tournamentType === "bounty" || tournamentType === "pko";
 
@@ -125,8 +127,9 @@ export function App() {
 
     // Build players: "You" + equal-stack opponents
     const opponentCount = s.remainingPlayers - 1;
-    const opponentStack =
-      opponentCount > 0 ? (totalChips - s.myStack) / opponentCount : 0;
+    const opponentStack = opponentCount > 0
+      ? (totalChips - s.myStack) / opponentCount
+      : 0;
 
     const mttPlayers: PlayerInputType[] = [{ name: "You", stack: s.myStack }];
     for (let i = 0; i < opponentCount; i++) {
@@ -166,22 +169,28 @@ export function App() {
     return [you, opponent];
   }, [result, isSimple]);
 
-  const estimatedPlayerCount =
-    inputMode === "mttSimple" ? mttSimple.remainingPlayers : players.length;
+  const estimatedPlayerCount = inputMode === "mttSimple"
+    ? mttSimple.remainingPlayers
+    : players.length;
+
+  const estimate = useMemo(
+    () => estimateCalcTime(estimatedPlayerCount),
+    [estimatedPlayerCount],
+  );
 
   const estimateHint = useMemo(() => {
-    const est = estimateCalcTime(estimatedPlayerCount);
     const keyMap: Record<string, Record<string, string>> = {
       exact: { instant: "estimateExactInstant" },
       approximate: {
         fast: "estimateApproxFast",
         moderate: "estimateApproxModerate",
         slow: "estimateApproxSlow",
+        verySlow: "estimateApproxVerySlow",
       },
     };
-    const i18nKey = keyMap[est.algorithm]?.[est.timeKey];
+    const i18nKey = keyMap[estimate.algorithm]?.[estimate.timeKey];
     return i18nKey ? t(i18nKey) : undefined;
-  }, [estimatedPlayerCount, t]);
+  }, [estimate, t]);
 
   return (
     <div class="container">
@@ -214,48 +223,49 @@ export function App() {
         </div>
       </div>
 
-      {isSimple ? (
-        <MttSimpleMode t={t} state={mttSimple} onUpdate={setMttSimple} />
-      ) : (
-        <>
-          <TournamentTypeSelector
-            t={t}
-            value={tournamentType}
-            onChange={setTournamentType}
-          />
+      {isSimple
+        ? <MttSimpleMode t={t} state={mttSimple} onUpdate={setMttSimple} />
+        : (
+          <>
+            <TournamentTypeSelector
+              t={t}
+              value={tournamentType}
+              onChange={setTournamentType}
+            />
 
-          <PlayerInput
-            t={t}
-            players={players}
-            showBounty={showBounty}
-            onUpdate={setPlayers}
-          />
+            <PlayerInput
+              t={t}
+              players={players}
+              showBounty={showBounty}
+              onUpdate={setPlayers}
+            />
 
-          <PayoutStructure
-            t={t}
-            prizeStructure={prizeStructure}
-            onUpdate={setPrizeStructure}
-          />
+            <PayoutStructure
+              t={t}
+              prizeStructure={prizeStructure}
+              onUpdate={setPrizeStructure}
+            />
 
-          {tournamentType === "pko" && (
-            <PkoSettings t={t} config={pkoConfig} onUpdate={setPkoConfig} />
-          )}
+            {tournamentType === "pko" && (
+              <PkoSettings t={t} config={pkoConfig} onUpdate={setPkoConfig} />
+            )}
 
-          <BreakevenInput
-            t={t}
-            breakeven={breakeven}
-            onUpdate={setBreakeven}
-            open={breakevenEnabled}
-            onToggle={setBreakevenEnabled}
-          />
-        </>
-      )}
+            <BreakevenInput
+              t={t}
+              breakeven={breakeven}
+              onUpdate={setBreakeven}
+              open={breakevenEnabled}
+              onToggle={setBreakevenEnabled}
+            />
+          </>
+        )}
 
       <CalculateButton
         t={t}
         isLoading={isLoading}
         onClick={handleCalculate}
         estimateHint={estimateHint}
+        isWarning={estimate.timeKey === "verySlow"}
       />
 
       {error && <div class="error-message">{error}</div>}
@@ -281,13 +291,19 @@ export function App() {
             entryFee={breakevenEntryFee}
           />
 
-          {result.pressureCurve.length > 0 && (
-            <PressureCurveChart
-              t={t}
-              curve={result.pressureCurve}
-              entryFee={breakevenEntryFee}
-            />
-          )}
+          {result.pressureCurve.length > 0
+            ? (
+              <PressureCurveChart
+                t={t}
+                curve={result.pressureCurve}
+                entryFee={breakevenEntryFee}
+              />
+            )
+            : (
+              result.metadata.playerCount > 50 && (
+                <div class="info-message">{t("pressureCurveSkipped")}</div>
+              )
+            )}
 
           <MetadataBar t={t} metadata={result.metadata} />
         </div>

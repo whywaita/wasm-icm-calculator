@@ -1,4 +1,4 @@
-import { useState, useMemo } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import type { PlayerResult } from "../types";
 
 interface ResultsTableProps {
@@ -42,8 +42,7 @@ function getValue(p: PlayerResult, key: SortKey): number | string {
       return p.breakeven?.profitLoss ?? 0;
     case "icmPremium": {
       if (!p.breakeven) return 0;
-      const chipEv =
-        p.stack * (p.breakeven.buyIn / p.breakeven.startingChips);
+      const chipEv = p.stack * (p.breakeven.buyIn / p.breakeven.startingChips);
       return chipEv > 0 ? p.breakeven.icmDollar / chipEv : 0;
     }
     default:
@@ -75,9 +74,7 @@ export function ResultsTable({
       const aVal = getValue(a, sortKey);
       const bVal = getValue(b, sortKey);
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return sortAsc
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
+        return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
       }
       const diff = (aVal as number) - (bVal as number);
       return sortAsc ? diff : -diff;
@@ -86,9 +83,8 @@ export function ResultsTable({
 
   const sortIndicator = (key: SortKey) => {
     if (sortKey !== key) return null;
-    return (
-      <span class="sort-indicator">{sortAsc ? " \u25B2" : " \u25BC"}</span>
-    );
+    return <span class="sort-indicator">{sortAsc ? " \u25B2" : " \u25BC"}
+    </span>;
   };
 
   type Column = { key: SortKey; label: string };
@@ -117,7 +113,10 @@ export function ResultsTable({
         <thead>
           <tr>
             {columns.map((col) => (
-              <th key={col.key} onClick={() => toggleSort(col.key)}>
+              <th
+                key={col.key}
+                onClick={() => toggleSort(col.key)}
+              >
                 {col.label}
                 {sortIndicator(col.key)}
               </th>

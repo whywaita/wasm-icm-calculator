@@ -54,10 +54,9 @@ export function BreakevenInput({
               onInput={(e) =>
                 onUpdate({
                   ...breakeven,
-                  entryFee:
-                    parseFloat((e.target as HTMLInputElement).value) || 0,
-                })
-              }
+                  entryFee: parseFloat((e.target as HTMLInputElement).value) ||
+                    0,
+                })}
             />
           </div>
           <div class="field">
@@ -72,10 +71,9 @@ export function BreakevenInput({
               onInput={(e) =>
                 onUpdate({
                   ...breakeven,
-                  rakePct:
-                    parseFloat((e.target as HTMLInputElement).value) || 0,
-                })
-              }
+                  rakePct: parseFloat((e.target as HTMLInputElement).value) ||
+                    0,
+                })}
             />
           </div>
         </div>
@@ -99,8 +97,7 @@ export function BreakevenInput({
                 ...breakeven,
                 startingChips:
                   parseFloat((e.target as HTMLInputElement).value) || 10000,
-              })
-            }
+              })}
           />
         </div>
       </div>

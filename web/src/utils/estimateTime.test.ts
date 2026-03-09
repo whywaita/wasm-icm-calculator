@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { estimateCalcTime } from "./estimateTime";
 
 describe("estimateCalcTime", () => {
@@ -30,5 +30,20 @@ describe("estimateCalcTime", () => {
   it("returns approximate/slow for 41 players (boundary)", () => {
     const result = estimateCalcTime(41);
     expect(result).toEqual({ algorithm: "approximate", timeKey: "slow" });
+  });
+
+  it("returns approximate/slow for 100 players (boundary)", () => {
+    const result = estimateCalcTime(100);
+    expect(result).toEqual({ algorithm: "approximate", timeKey: "slow" });
+  });
+
+  it("returns approximate/verySlow for 101 players (boundary)", () => {
+    const result = estimateCalcTime(101);
+    expect(result).toEqual({ algorithm: "approximate", timeKey: "verySlow" });
+  });
+
+  it("returns approximate/verySlow for 200 players", () => {
+    const result = estimateCalcTime(200);
+    expect(result).toEqual({ algorithm: "approximate", timeKey: "verySlow" });
   });
 });
