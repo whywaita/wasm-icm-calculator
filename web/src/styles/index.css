@@ -412,8 +412,26 @@ button {
 }
 .collapse-body.open {
   max-height: 400px;
+  overflow-y: auto;
   opacity: 1;
   padding-top: 16px;
+}
+
+.payout-detail-table {
+  width: 100%;
+  font-size: 0.9rem;
+}
+.payout-detail-table th {
+  text-align: left;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.payout-detail-table td {
+  padding: 3px 8px;
+  font-family: var(--mono);
+  font-size: 0.9rem;
 }
 
 /* === Breakeven split === */

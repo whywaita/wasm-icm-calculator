@@ -1,8 +1,6 @@
-import { useMemo } from "preact/hooks";
-import {
-  generateMttPayouts,
-  MTT_PAYOUT_PRESETS,
-} from "../utils/mttPayouts";
+import { useMemo, useState } from "preact/hooks";
+import { ordinal } from "./PayoutStructure";
+import { generateMttPayouts, MTT_PAYOUT_PRESETS } from "../utils/mttPayouts";
 
 export interface MttSimpleState {
   entryFee: number;
@@ -41,6 +39,8 @@ export function MttSimpleMode({ t, state, onUpdate }: MttSimpleModeProps) {
   );
 
   const paidPositions = payouts.length;
+
+  const [payoutOpen, setPayoutOpen] = useState(false);
 
   const set = (partial: Partial<MttSimpleState>) =>
     onUpdate({ ...state, ...partial });
@@ -83,12 +83,10 @@ export function MttSimpleMode({ t, state, onUpdate }: MttSimpleModeProps) {
 
         <div class="be-display" style={{ marginBottom: "12px" }}>
           <div class="be-item">
-            {t("buyIn")}{" "}
-            <span class="be-val">{buyIn.toFixed(2)}</span>
+            {t("buyIn")} <span class="be-val">{buyIn.toFixed(2)}</span>
           </div>
           <div class="be-item">
-            {t("rake")}{" "}
-            <span class="be-val">{rake.toFixed(2)}</span>
+            {t("rake")} <span class="be-val">{rake.toFixed(2)}</span>
           </div>
           <div class="be-item">
             {t("mttPrizePool")}{" "}
@@ -190,21 +188,49 @@ export function MttSimpleMode({ t, state, onUpdate }: MttSimpleModeProps) {
           ))}
         </div>
 
-        <div class="mtt-payout-summary">
-          <span class="field-label">{t("mttPaidPositions")}</span>
-          <span class="be-val" style={{ marginLeft: "8px" }}>
-            {paidPositions}
-          </span>
-          <span
-            style={{
-              marginLeft: "16px",
-              fontSize: "0.88rem",
-              color: "var(--text-tertiary)",
-            }}
-          >
-            {t("mttPayoutPreview")} {payouts.slice(0, 3).map((p) => `${p}%`).join(" / ")}{" "}
-            {payouts.length > 3 ? "..." : ""}
-          </span>
+        <div
+          class={`collapse-trigger mtt-payout-summary${payoutOpen ? " open" : ""}`}
+          onClick={() => setPayoutOpen((v) => !v)}
+        >
+          <div>
+            <span class="field-label">{t("mttPaidPositions")}</span>
+            <span class="be-val" style={{ marginLeft: "8px" }}>
+              {paidPositions}
+            </span>
+            <span
+              style={{
+                marginLeft: "16px",
+                fontSize: "0.88rem",
+                color: "var(--text-tertiary)",
+              }}
+            >
+              {t("mttPayoutPreview")}{" "}
+              {payouts
+                .slice(0, 3)
+                .map((p) => `${p}%`)
+                .join(" / ")}{" "}
+              {payouts.length > 3 ? "..." : ""}
+            </span>
+          </div>
+          <span class="collapse-chevron">&#9654;</span>
+        </div>
+        <div class={`collapse-body${payoutOpen ? " open" : ""}`}>
+          <table class="payout-detail-table">
+            <thead>
+              <tr>
+                <th>{t("position")}</th>
+                <th>{t("percentage")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payouts.map((p, i) => (
+                <tr key={i}>
+                  <td>{ordinal(i + 1)}</td>
+                  <td>{p}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </>
