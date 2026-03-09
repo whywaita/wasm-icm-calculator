@@ -24,20 +24,6 @@ Unlike existing tools, this calculator is **free, open-source, and runs 100% cli
 
 **[Open the calculator](https://whywaita.github.io/wasm-icm-calculator/)**
 
-## Screenshots
-
-### Input Form
-
-![Input form](docs/screenshots/initial-view.png)
-
-### Results Table
-
-![Results table](docs/screenshots/results-table.png)
-
-### Charts
-
-![Equity bar chart and pressure curve](docs/screenshots/results-charts.png)
-
 ## Getting Started (Development)
 
 ### Prerequisites
