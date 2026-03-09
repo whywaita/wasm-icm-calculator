@@ -158,6 +158,14 @@ export function App() {
   const breakevenEntryFee = result?.players[0]?.breakeven?.entryFee;
   const isSimple = inputMode === "mttSimple";
 
+  const displayPlayers = useMemo(() => {
+    if (!result) return [];
+    if (!isSimple || result.players.length <= 2) return result.players;
+    const you = result.players[0];
+    const opponent = { ...result.players[1], name: "Opponent (avg)" };
+    return [you, opponent];
+  }, [result, isSimple]);
+
   const estimatedPlayerCount =
     inputMode === "mttSimple" ? mttSimple.remainingPlayers : players.length;
 
@@ -261,14 +269,14 @@ export function App() {
 
           <ResultsTable
             t={t}
-            players={result.players}
+            players={displayPlayers}
             showBounty={!isSimple && showBounty}
             showBreakeven={!!result.players[0]?.breakeven}
           />
 
           <EquityChart
             t={t}
-            players={result.players}
+            players={displayPlayers}
             showBounty={!isSimple && showBounty}
             entryFee={breakevenEntryFee}
           />
