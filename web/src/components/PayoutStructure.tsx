@@ -13,7 +13,7 @@ const PRESETS: Record<string, number[]> = {
   "standard-mtt-9": [30, 20, 14, 10.5, 8, 6.5, 5, 3.5, 2.5],
 };
 
-function ordinal(n: number): string {
+export function ordinal(n: number): string {
   const s = ["th", "st", "nd", "rd"];
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
@@ -74,7 +74,9 @@ export function PayoutStructure({
               name="payoutType"
               value="percentage"
               checked={isPct}
-              onChange={() => onUpdate({ ...prizeStructure, type: "percentage" })}
+              onChange={() =>
+                onUpdate({ ...prizeStructure, type: "percentage" })
+              }
             />
             {t("percentage")}
           </label>
@@ -95,9 +97,7 @@ export function PayoutStructure({
         <div class="field">
           <span class="field-label">{t("preset")}</span>
           <select
-            onChange={(e) =>
-              applyPreset((e.target as HTMLSelectElement).value)
-            }
+            onChange={(e) => applyPreset((e.target as HTMLSelectElement).value)}
           >
             <option value="">{t("presetSelect")}</option>
             <option value="50/30/20">{t("preset5030")}</option>
