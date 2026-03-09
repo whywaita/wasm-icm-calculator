@@ -339,6 +339,12 @@ button {
   transform: none;
 }
 
+/* === Calculate button === */
+.calculate-button-wrapper {
+  margin: 24px 0;
+  text-align: center;
+}
+
 /* === Layout utilities === */
 .hidden {
   display: none !important;

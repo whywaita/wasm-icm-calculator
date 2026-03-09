@@ -37,14 +37,10 @@ fn simulate_elimination_order(
     while remaining.len() > 1 && finish_order.len() < num_paid {
         let total: f64 = remaining.iter().map(|&i| remaining_stacks[i]).sum();
 
-        // Pick who finishes first among remaining (probability proportional to stack)
-        // Actually, ICM elimination: we need to pick who gets ELIMINATED (lowest finisher)
-        // The last one eliminated finishes highest
-        // For correct ICM MC: randomly pick elimination order, then assign prizes in reverse
-
-        // Pick who gets eliminated: probability proportional to INVERSE of stack
-        // Actually the standard MC approach: randomly pick a finishing order
-        // where probability of finishing 1st is proportional to stack
+        // Malmuth-Harville Monte Carlo: select the highest finisher among remaining
+        // players with probability proportional to their stack size (larger stack = more
+        // likely to finish in a higher position). The selected player is removed from the
+        // pool and awarded the next-best finishing position.
         let r: f64 = rng.gen_range(0.0..total);
         let mut cumulative = 0.0;
         let mut winner_idx = 0;

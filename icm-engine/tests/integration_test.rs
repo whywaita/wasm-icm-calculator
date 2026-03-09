@@ -1,7 +1,9 @@
 use icm_engine::bounty::compute_bounty_equity;
 use icm_engine::icm_exact::compute_equity_exact;
 use icm_engine::pko::compute_pko_bounty_equity;
-use icm_engine::types::{CalculationInput, PkoConfig, PlayerInput, PrizeStructure};
+use icm_engine::types::{
+    CalculationInput, PayoutType, PkoConfig, PlayerInput, PrizeStructure, TournamentType,
+};
 use icm_engine::validation::validate;
 
 /// End-to-end test for a standard ICM tournament:
@@ -9,7 +11,7 @@ use icm_engine::validation::validate;
 #[test]
 fn standard_tournament_end_to_end() {
     let input = CalculationInput {
-        tournament_type: "standard".to_string(),
+        tournament_type: TournamentType::Standard,
         players: vec![
             PlayerInput {
                 name: Some("Alice".to_string()),
@@ -28,7 +30,7 @@ fn standard_tournament_end_to_end() {
             },
         ],
         prize_structure: PrizeStructure {
-            payout_type: "absolute".to_string(),
+            payout_type: PayoutType::Absolute,
             payouts: vec![50.0, 30.0, 20.0],
             total_prize_pool: Some(100.0),
         },
@@ -68,7 +70,7 @@ fn standard_tournament_end_to_end() {
 #[test]
 fn bounty_tournament_end_to_end() {
     let input = CalculationInput {
-        tournament_type: "bounty".to_string(),
+        tournament_type: TournamentType::Bounty,
         players: vec![
             PlayerInput {
                 name: Some("Alice".to_string()),
@@ -87,7 +89,7 @@ fn bounty_tournament_end_to_end() {
             },
         ],
         prize_structure: PrizeStructure {
-            payout_type: "absolute".to_string(),
+            payout_type: PayoutType::Absolute,
             payouts: vec![50.0, 30.0, 20.0],
             total_prize_pool: Some(100.0),
         },
@@ -133,7 +135,7 @@ fn bounty_tournament_end_to_end() {
 #[test]
 fn pko_tournament_end_to_end() {
     let input = CalculationInput {
-        tournament_type: "pko".to_string(),
+        tournament_type: TournamentType::Pko,
         players: vec![
             PlayerInput {
                 name: None,
@@ -152,7 +154,7 @@ fn pko_tournament_end_to_end() {
             },
         ],
         prize_structure: PrizeStructure {
-            payout_type: "absolute".to_string(),
+            payout_type: PayoutType::Absolute,
             payouts: vec![50.0, 30.0, 20.0],
             total_prize_pool: Some(100.0),
         },
@@ -190,7 +192,7 @@ fn pko_tournament_end_to_end() {
 #[test]
 fn percentage_payout_resolution() {
     let input = CalculationInput {
-        tournament_type: "standard".to_string(),
+        tournament_type: TournamentType::Standard,
         players: vec![
             PlayerInput {
                 name: None,
@@ -204,7 +206,7 @@ fn percentage_payout_resolution() {
             },
         ],
         prize_structure: PrizeStructure {
-            payout_type: "percentage".to_string(),
+            payout_type: PayoutType::Percentage,
             payouts: vec![60.0, 40.0], // 60% and 40%
             total_prize_pool: Some(1000.0),
         },
@@ -231,10 +233,10 @@ fn percentage_payout_resolution() {
 fn invalid_input_rejected() {
     // No players
     let input = CalculationInput {
-        tournament_type: "standard".to_string(),
+        tournament_type: TournamentType::Standard,
         players: vec![],
         prize_structure: PrizeStructure {
-            payout_type: "absolute".to_string(),
+            payout_type: PayoutType::Absolute,
             payouts: vec![100.0],
             total_prize_pool: Some(100.0),
         },
@@ -252,14 +254,14 @@ fn invalid_input_rejected() {
 #[test]
 fn multiple_validation_errors_collected() {
     let input = CalculationInput {
-        tournament_type: "bounty".to_string(),
+        tournament_type: TournamentType::Bounty,
         players: vec![PlayerInput {
             name: None,
             stack: -100.0, // negative stack
             bounty: None,  // missing bounty for bounty tournament
         }],
         prize_structure: PrizeStructure {
-            payout_type: "absolute".to_string(),
+            payout_type: PayoutType::Absolute,
             payouts: vec![],
             total_prize_pool: Some(100.0),
         },

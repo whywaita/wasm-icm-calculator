@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-type MemoCache = HashMap<(usize, u32), f64>;
+type MemoCache = HashMap<(usize, u64), f64>;
 
 /// Compute exact ICM equity using Malmuth-Harville model with bitmask memoization.
 /// Recursion depth is pruned by the number of payout positions.
@@ -25,7 +25,7 @@ fn compute_player_equity(
     cache: &mut MemoCache,
 ) -> f64 {
     let n = stacks.len();
-    let eliminated: u32 = 0;
+    let eliminated: u64 = 0;
     let mut equity = 0.0;
 
     for (position, &payout) in payouts.iter().enumerate().take(num_paid) {
@@ -40,7 +40,7 @@ fn finish_probability(
     player: usize,
     position: usize,
     stacks: &[f64],
-    eliminated: u32,
+    eliminated: u64,
     n: usize,
     num_paid: usize,
     cache: &mut MemoCache,
@@ -82,7 +82,7 @@ fn finish_probability(
     prob
 }
 
-fn first_place_probability(player: usize, stacks: &[f64], eliminated: u32, n: usize) -> f64 {
+fn first_place_probability(player: usize, stacks: &[f64], eliminated: u64, n: usize) -> f64 {
     if eliminated & (1 << player) != 0 {
         return 0.0;
     }

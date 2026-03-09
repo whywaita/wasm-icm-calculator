@@ -9,7 +9,10 @@ pub mod pressure;
 pub mod types;
 pub mod validation;
 
-use types::{CalculationInput, CalculationResult, ErrorResponse, ResultMetadata};
+use types::{CalculationInput, CalculationResult, ErrorResponse, ResultMetadata, TournamentType};
+
+const EXACT_PLAYER_THRESHOLD: usize = 20;
+const DEFAULT_MC_ITERATIONS: u32 = 100_000;
 
 #[wasm_bindgen(start)]
 pub fn init_panic_hook() {
@@ -51,16 +54,20 @@ fn compute(input: &CalculationInput) -> CalculationResult {
     let payouts = input.resolved_payouts();
     let n = stacks.len();
 
-    let algorithm = if n <= 20 { "exact" } else { "approximate" };
-
-    let icm_equities = if n <= 20 {
-        icm_exact::compute_equity_exact(&stacks, &payouts)
+    let algorithm = if n <= EXACT_PLAYER_THRESHOLD {
+        "exact"
     } else {
-        icm_monte_carlo::compute_equity_monte_carlo(&stacks, &payouts, 100_000)
+        "approximate"
     };
 
-    let bounty_equities = match input.tournament_type.as_str() {
-        "bounty" => {
+    let icm_equities = if n <= EXACT_PLAYER_THRESHOLD {
+        icm_exact::compute_equity_exact(&stacks, &payouts)
+    } else {
+        icm_monte_carlo::compute_equity_monte_carlo(&stacks, &payouts, DEFAULT_MC_ITERATIONS)
+    };
+
+    let bounty_equities = match input.tournament_type {
+        TournamentType::Bounty => {
             let bounties: Vec<f64> = input
                 .players
                 .iter()
@@ -68,7 +75,7 @@ fn compute(input: &CalculationInput) -> CalculationResult {
                 .collect();
             Some(bounty::compute_bounty_equity(&stacks, &bounties))
         }
-        "pko" => {
+        TournamentType::Pko => {
             let bounties: Vec<f64> = input
                 .players
                 .iter()
@@ -81,7 +88,7 @@ fn compute(input: &CalculationInput) -> CalculationResult {
                 .unwrap_or(0.5);
             Some(pko::compute_pko_bounty_equity(&stacks, &bounties, rate))
         }
-        _ => None,
+        TournamentType::Standard => None,
     };
 
     let total_prize_pool: f64 = payouts.iter().sum();

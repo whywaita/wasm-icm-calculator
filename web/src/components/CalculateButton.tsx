@@ -10,7 +10,7 @@ export function CalculateButton({
   onClick,
 }: CalculateButtonProps) {
   return (
-    <div style={{ margin: "24px 0", textAlign: "center" }}>
+    <div class="calculate-button-wrapper">
       <button class="btn-primary" disabled={isLoading} onClick={onClick}>
         {isLoading ? t("calculating") : t("calculate")}
       </button>

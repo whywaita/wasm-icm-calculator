@@ -1,4 +1,5 @@
 import type { PlayerInput } from "../types";
+import { parseCsvPlayers } from "../utils/csvParser";
 
 interface CsvInputProps {
   t: (key: string) => string;
@@ -17,27 +18,7 @@ export function CsvInput({ t, showBounty, players, onUpdate }: CsvInputProps) {
     .join("\n");
 
   const handleInput = (value: string) => {
-    const lines = value
-      .trim()
-      .split("\n")
-      .filter((l) => l.trim());
-    const parsed: PlayerInput[] = lines.map((line, i) => {
-      const parts = line.split(",").map((s) => s.trim());
-      return {
-        name: parts[0] || `Player ${i + 1}`,
-        stack: parseInt(parts[1]) || 1000,
-        bounty: parseInt(parts[2]) || 10,
-      };
-    });
-
-    while (parsed.length < 2) {
-      parsed.push({
-        name: `Player ${parsed.length + 1}`,
-        stack: 1000,
-        bounty: 10,
-      });
-    }
-    onUpdate(parsed);
+    onUpdate(parseCsvPlayers(value, showBounty));
   };
 
   return (

@@ -46,6 +46,7 @@ export interface BreakevenResult {
   buyIn: number;
   profitLoss: number;
   isAboveBreakeven: boolean;
+  startingChips: number;
 }
 
 export interface PlayerResult {

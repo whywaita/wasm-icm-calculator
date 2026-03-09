@@ -8,7 +8,17 @@ interface ResultsTableProps {
   showBreakeven: boolean;
 }
 
-type SortKey = string;
+type SortKey =
+  | "name"
+  | "stack"
+  | "stackPercentage"
+  | "icmEquity"
+  | "icmEquityPercentage"
+  | "bountyEquity"
+  | "totalEquity"
+  | "entryFee"
+  | "profitLoss"
+  | "icmPremium";
 
 function getValue(p: PlayerResult, key: SortKey): number | string {
   switch (key) {
@@ -32,7 +42,8 @@ function getValue(p: PlayerResult, key: SortKey): number | string {
       return p.breakeven?.profitLoss ?? 0;
     case "icmPremium": {
       if (!p.breakeven) return 0;
-      const chipEv = p.stack * (p.breakeven.buyIn / 10000);
+      const chipEv =
+        p.stack * (p.breakeven.buyIn / p.breakeven.startingChips);
       return chipEv > 0 ? p.breakeven.icmDollar / chipEv : 0;
     }
     default:
@@ -119,7 +130,7 @@ export function ResultsTable({
             const pl = be?.profitLoss ?? 0;
             const icmPremium = (() => {
               if (!be) return 0;
-              const chipEv = p.stack * (be.buyIn / 10000);
+              const chipEv = p.stack * (be.buyIn / be.startingChips);
               return chipEv > 0 ? be.icmDollar / chipEv : 0;
             })();
 

@@ -43,6 +43,19 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
     const resultJson = calculate(inputJson);
     const result = JSON.parse(resultJson);
 
+    if (result.error === true) {
+      const messages =
+        result.validationErrors
+          ?.map(
+            (e: { field: string; message: string }) =>
+              `${e.field}: ${e.message}`,
+          )
+          .join("; ") ?? "Validation failed";
+      const response: WorkerResponse = { type: "error", error: messages };
+      self.postMessage(response);
+      return;
+    }
+
     const response: WorkerResponse = { type: "result", data: result };
     self.postMessage(response);
   } catch (e) {

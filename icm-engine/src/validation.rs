@@ -1,4 +1,4 @@
-use crate::types::{CalculationInput, ValidationError};
+use crate::types::{CalculationInput, PayoutType, TournamentType, ValidationError};
 
 pub fn validate(input: &CalculationInput) -> Result<(), Vec<ValidationError>> {
     let mut errors = Vec::new();
@@ -25,7 +25,8 @@ pub fn validate(input: &CalculationInput) -> Result<(), Vec<ValidationError>> {
             });
         }
 
-        let needs_bounty = input.tournament_type == "bounty" || input.tournament_type == "pko";
+        let needs_bounty = input.tournament_type == TournamentType::Bounty
+            || input.tournament_type == TournamentType::Pko;
         if needs_bounty {
             match player.bounty {
                 None => {
@@ -60,8 +61,8 @@ pub fn validate(input: &CalculationInput) -> Result<(), Vec<ValidationError>> {
     }
 
     let payout_sum: f64 = payouts.iter().sum();
-    match input.prize_structure.payout_type.as_str() {
-        "percentage" => {
+    match input.prize_structure.payout_type {
+        PayoutType::Percentage => {
             if let Some(pool) = input.prize_structure.total_prize_pool {
                 if pool <= 0.0 {
                     errors.push(ValidationError {
@@ -83,7 +84,7 @@ pub fn validate(input: &CalculationInput) -> Result<(), Vec<ValidationError>> {
                 });
             }
         }
-        "absolute" => {
+        PayoutType::Absolute => {
             if let Some(pool) = input.prize_structure.total_prize_pool {
                 if payout_sum > pool + f64::EPSILON {
                     errors.push(ValidationError {
@@ -93,10 +94,9 @@ pub fn validate(input: &CalculationInput) -> Result<(), Vec<ValidationError>> {
                 }
             }
         }
-        _ => {}
     }
 
-    if input.tournament_type == "pko" {
+    if input.tournament_type == TournamentType::Pko {
         if let Some(ref config) = input.pko_config {
             if config.inheritance_rate <= 0.0 || config.inheritance_rate > 1.0 {
                 errors.push(ValidationError {

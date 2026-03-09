@@ -1,9 +1,24 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub enum TournamentType {
+    Standard,
+    Bounty,
+    Pko,
+}
+
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub enum PayoutType {
+    Percentage,
+    Absolute,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CalculationInput {
-    pub tournament_type: String,
+    pub tournament_type: TournamentType,
     pub players: Vec<PlayerInput>,
     pub prize_structure: PrizeStructure,
     pub pko_config: Option<PkoConfig>,
@@ -12,8 +27,8 @@ pub struct CalculationInput {
 
 impl CalculationInput {
     pub fn resolved_payouts(&self) -> Vec<f64> {
-        match self.prize_structure.payout_type.as_str() {
-            "percentage" => {
+        match self.prize_structure.payout_type {
+            PayoutType::Percentage => {
                 let pool = self.prize_structure.total_prize_pool.unwrap_or(0.0);
                 let sum: f64 = self.prize_structure.payouts.iter().sum();
                 self.prize_structure
@@ -22,7 +37,7 @@ impl CalculationInput {
                     .map(|p| (p / sum) * pool)
                     .collect()
             }
-            _ => self.prize_structure.payouts.clone(),
+            PayoutType::Absolute => self.prize_structure.payouts.clone(),
         }
     }
 }
@@ -39,7 +54,7 @@ pub struct PlayerInput {
 #[serde(rename_all = "camelCase")]
 pub struct PrizeStructure {
     #[serde(rename = "type")]
-    pub payout_type: String,
+    pub payout_type: PayoutType,
     pub payouts: Vec<f64>,
     pub total_prize_pool: Option<f64>,
 }
@@ -92,6 +107,7 @@ pub struct BreakevenResult {
     pub buy_in: f64,
     pub profit_loss: f64,
     pub is_above_breakeven: bool,
+    pub starting_chips: f64,
 }
 
 #[derive(Debug, Serialize)]

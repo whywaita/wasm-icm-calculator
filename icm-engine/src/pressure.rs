@@ -2,6 +2,9 @@ use crate::icm_exact;
 use crate::icm_monte_carlo;
 use crate::types::PressureCurvePoint;
 
+const EXACT_CURVE_POINTS: usize = 20;
+const MC_CURVE_POINTS: usize = 50;
+
 /// Compute ICM pressure curve by varying a hypothetical player's stack.
 /// For exact: 20 data points. For Monte Carlo: 50 data points.
 pub fn compute_pressure_curve(
@@ -11,7 +14,11 @@ pub fn compute_pressure_curve(
 ) -> Vec<PressureCurvePoint> {
     let max_stack = stacks.iter().cloned().fold(0.0_f64, f64::max);
     let total_chips: f64 = stacks.iter().sum();
-    let num_points = if is_exact { 20 } else { 50 };
+    let num_points = if is_exact {
+        EXACT_CURVE_POINTS
+    } else {
+        MC_CURVE_POINTS
+    };
 
     // Range from 0 to 2x max stack (but capped at total chips)
     let upper = (max_stack * 2.0).min(total_chips);

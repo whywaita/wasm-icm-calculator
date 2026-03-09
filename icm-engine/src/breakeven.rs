@@ -8,6 +8,7 @@ pub fn compute_breakeven(icm_dollar: f64, input: &BreakevenInput) -> BreakevenRe
         buy_in: input.buy_in,
         profit_loss,
         is_above_breakeven: profit_loss > 0.0,
+        starting_chips: input.starting_chips,
     }
 }
 
@@ -26,6 +27,7 @@ mod tests {
         let result = compute_breakeven(200.0, &input);
         assert!(result.is_above_breakeven);
         assert!((result.profit_loss - 90.0).abs() < 1e-10);
+        assert!((result.starting_chips - 10000.0).abs() < 1e-10);
     }
 
     #[test]
@@ -39,5 +41,6 @@ mod tests {
         let result = compute_breakeven(50.0, &input);
         assert!(!result.is_above_breakeven);
         assert!((result.profit_loss - (-60.0)).abs() < 1e-10);
+        assert!((result.starting_chips - 10000.0).abs() < 1e-10);
     }
 }

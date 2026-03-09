@@ -1,5 +1,7 @@
+const PKO_DEPTH_CUTOFF: f64 = 0.1;
+
 /// Compute PKO bounty equity with recursive inheritance model.
-/// Recursion is cut off when r^depth < 0.1.
+/// Recursion is cut off when r^depth < PKO_DEPTH_CUTOFF.
 pub fn compute_pko_bounty_equity(
     stacks: &[f64],
     bounties: &[f64],
@@ -20,8 +22,8 @@ fn compute_max_depth(r: f64) -> usize {
     if r <= 0.0 || r >= 1.0 {
         return if r >= 1.0 { 50 } else { 1 };
     }
-    // r^depth < 0.1 => depth > log(0.1) / log(r)
-    let depth = (0.1_f64.ln() / r.ln()).ceil() as usize;
+    // r^depth < PKO_DEPTH_CUTOFF => depth > log(PKO_DEPTH_CUTOFF) / log(r)
+    let depth = (PKO_DEPTH_CUTOFF.ln() / r.ln()).ceil() as usize;
     depth.max(1)
 }
 
