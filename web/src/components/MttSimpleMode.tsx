@@ -23,10 +23,9 @@ export function MttSimpleMode({ t, state, onUpdate }: MttSimpleModeProps) {
   const buyIn = state.entryFee - rake;
   const prizePool = buyIn * state.totalEntries;
   const totalChips = state.startingChips * state.totalEntries;
-  const avgStack =
-    state.remainingPlayers > 1
-      ? (totalChips - state.myStack) / (state.remainingPlayers - 1)
-      : 0;
+  const avgStack = state.remainingPlayers > 1
+    ? (totalChips - state.myStack) / (state.remainingPlayers - 1)
+    : 0;
 
   const selectedPreset = MTT_PAYOUT_PRESETS.find(
     (p) => p.key === state.payoutPresetKey,
@@ -129,16 +128,15 @@ export function MttSimpleMode({ t, state, onUpdate }: MttSimpleModeProps) {
               type="number"
               value={state.remainingPlayers}
               min={2}
-              max={Math.min(state.totalEntries, 50)}
+              max={state.totalEntries}
               step={1}
               onInput={(e) =>
                 set({
                   remainingPlayers: Math.max(
                     2,
-                    Math.min(state.totalEntries, 50, int(e)),
+                    Math.min(state.totalEntries, int(e)),
                   ),
-                })
-              }
+                })}
             />
           </div>
           <div class="field">
@@ -189,7 +187,9 @@ export function MttSimpleMode({ t, state, onUpdate }: MttSimpleModeProps) {
         </div>
 
         <div
-          class={`collapse-trigger mtt-payout-summary${payoutOpen ? " open" : ""}`}
+          class={`collapse-trigger mtt-payout-summary${
+            payoutOpen ? " open" : ""
+          }`}
           onClick={() => setPayoutOpen((v) => !v)}
         >
           <div>
@@ -204,12 +204,10 @@ export function MttSimpleMode({ t, state, onUpdate }: MttSimpleModeProps) {
                 color: "var(--text-tertiary)",
               }}
             >
-              {t("mttPayoutPreview")}{" "}
-              {payouts
+              {t("mttPayoutPreview")} {payouts
                 .slice(0, 3)
                 .map((p) => `${p}%`)
-                .join(" / ")}{" "}
-              {payouts.length > 3 ? "..." : ""}
+                .join(" / ")} {payouts.length > 3 ? "..." : ""}
             </span>
           </div>
           <span class="collapse-chevron">&#9654;</span>

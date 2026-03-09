@@ -40,21 +40,23 @@ export function PlayerInput({
         </button>
       </div>
 
-      {mode === "table" ? (
-        <PlayerTable
-          t={t}
-          players={players}
-          showBounty={showBounty}
-          onUpdate={onUpdate}
-        />
-      ) : (
-        <CsvInput
-          t={t}
-          showBounty={showBounty}
-          players={players}
-          onUpdate={onUpdate}
-        />
-      )}
+      {mode === "table"
+        ? (
+          <PlayerTable
+            t={t}
+            players={players}
+            showBounty={showBounty}
+            onUpdate={onUpdate}
+          />
+        )
+        : (
+          <CsvInput
+            t={t}
+            showBounty={showBounty}
+            players={players}
+            onUpdate={onUpdate}
+          />
+        )}
     </div>
   );
 }

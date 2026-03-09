@@ -65,8 +65,7 @@ export function PlayerTable({
                       i,
                       "name",
                       (e.target as HTMLInputElement).value,
-                    )
-                  }
+                    )}
                 />
               </td>
               <td>
@@ -79,8 +78,7 @@ export function PlayerTable({
                       i,
                       "stack",
                       parseFloat((e.target as HTMLInputElement).value) || 0,
-                    )
-                  }
+                    )}
                 />
               </td>
               {showBounty && (
@@ -95,8 +93,7 @@ export function PlayerTable({
                         i,
                         "bounty",
                         parseFloat((e.target as HTMLInputElement).value) || 0,
-                      )
-                    }
+                      )}
                   />
                 </td>
               )}

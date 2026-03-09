@@ -24,7 +24,8 @@ export function TournamentTypeSelector({
               name="tournamentType"
               value={type}
               checked={value === type}
-              onChange={() => onChange(type)}
+              onChange={() =>
+                onChange(type)}
             />
             {t(type)}
           </label>

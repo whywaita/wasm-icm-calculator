@@ -15,7 +15,9 @@ async function initWasm(): Promise<void> {
     } catch (e) {
       initPromise = null;
       throw new Error(
-        `Failed to load WASM module: ${e instanceof Error ? e.message : String(e)}`,
+        `Failed to load WASM module: ${
+          e instanceof Error ? e.message : String(e)
+        }`,
       );
     }
   })();
@@ -44,13 +46,11 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
     const result = JSON.parse(resultJson);
 
     if (result.error === true) {
-      const messages =
-        result.validationErrors
-          ?.map(
-            (e: { field: string; message: string }) =>
-              `${e.field}: ${e.message}`,
-          )
-          .join("; ") ?? "Validation failed";
+      const messages = result.validationErrors
+        ?.map(
+          (e: { field: string; message: string }) => `${e.field}: ${e.message}`,
+        )
+        .join("; ") ?? "Validation failed";
       const response: WorkerResponse = { type: "error", error: messages };
       self.postMessage(response);
       return;

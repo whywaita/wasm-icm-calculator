@@ -1,14 +1,14 @@
-import { useRef, useEffect } from "preact/hooks";
+import { useEffect, useRef } from "preact/hooks";
 import {
+  CategoryScale,
   Chart,
+  Filler,
+  Legend,
+  LinearScale,
   LineController,
   LineElement,
   PointElement,
-  CategoryScale,
-  LinearScale,
   Tooltip,
-  Legend,
-  Filler,
 } from "chart.js";
 import type { PressureCurvePoint } from "../types";
 

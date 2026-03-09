@@ -10,12 +10,6 @@ pub fn validate(input: &CalculationInput) -> Result<(), Vec<ValidationError>> {
             message: "At least 2 players are required".to_string(),
         });
     }
-    if n > 50 {
-        errors.push(ValidationError {
-            field: "players".to_string(),
-            message: "Maximum 50 players supported".to_string(),
-        });
-    }
 
     for (i, player) in input.players.iter().enumerate() {
         if player.stack <= 0.0 {
@@ -135,5 +129,62 @@ pub fn validate(input: &CalculationInput) -> Result<(), Vec<ValidationError>> {
         Ok(())
     } else {
         Err(errors)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::{PlayerInput, PrizeStructure};
+
+    fn make_input(player_count: usize) -> CalculationInput {
+        let players: Vec<PlayerInput> = (0..player_count)
+            .map(|_| PlayerInput {
+                name: None,
+                stack: 1000.0,
+                bounty: None,
+            })
+            .collect();
+        let payouts: Vec<f64> = {
+            let paid = player_count.min(10);
+            let pct = 100.0 / paid as f64;
+            vec![pct; paid]
+        };
+        CalculationInput {
+            tournament_type: TournamentType::Standard,
+            players,
+            prize_structure: PrizeStructure {
+                payout_type: PayoutType::Percentage,
+                payouts,
+                total_prize_pool: Some(10000.0),
+            },
+            pko_config: None,
+            breakeven: None,
+        }
+    }
+
+    #[test]
+    fn test_50_players_valid() {
+        let input = make_input(50);
+        assert!(validate(&input).is_ok());
+    }
+
+    #[test]
+    fn test_51_players_valid() {
+        let input = make_input(51);
+        assert!(validate(&input).is_ok());
+    }
+
+    #[test]
+    fn test_100_players_valid() {
+        let input = make_input(100);
+        assert!(validate(&input).is_ok());
+    }
+
+    #[test]
+    fn test_1_player_invalid() {
+        let input = make_input(1);
+        let err = validate(&input).unwrap_err();
+        assert!(err.iter().any(|e| e.field == "players"));
     }
 }

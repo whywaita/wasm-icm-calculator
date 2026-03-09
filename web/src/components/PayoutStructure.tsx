@@ -29,7 +29,7 @@ export function PayoutStructure({
 
   const updatePrize = (index: number, value: number) => {
     const payouts = prizeStructure.payouts.map((p, i) =>
-      i === index ? value : p,
+      i === index ? value : p
     );
     onUpdate({ ...prizeStructure, payouts });
   };
@@ -75,8 +75,7 @@ export function PayoutStructure({
               value="percentage"
               checked={isPct}
               onChange={() =>
-                onUpdate({ ...prizeStructure, type: "percentage" })
-              }
+                onUpdate({ ...prizeStructure, type: "percentage" })}
             />
             {t("percentage")}
           </label>
@@ -121,8 +120,7 @@ export function PayoutStructure({
                 ...prizeStructure,
                 totalPrizePool:
                   parseFloat((e.target as HTMLInputElement).value) || 0,
-              })
-            }
+              })}
           />
         </div>
       )}
@@ -157,8 +155,7 @@ export function PayoutStructure({
                     updatePrize(
                       i,
                       parseFloat((e.target as HTMLInputElement).value) || 0,
-                    )
-                  }
+                    )}
                 />
               </td>
               <td>

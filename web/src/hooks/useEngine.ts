@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { EngineClient } from "../engine";
 import type { CalculationInput, CalculationResult } from "../types";
 

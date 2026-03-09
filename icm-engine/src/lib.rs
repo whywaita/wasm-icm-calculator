@@ -41,7 +41,7 @@ pub fn get_engine_info() -> String {
     serde_json::to_string(&serde_json::json!({
         "version": "0.1.0",
         "algorithms": ["exact", "approximate"],
-        "maxPlayers": 50
+        "maxPlayers": null
     }))
     .unwrap()
 }
@@ -121,7 +121,11 @@ fn compute(input: &CalculationInput) -> CalculationResult {
         })
         .collect();
 
-    let pressure_curve = pressure::compute_pressure_curve(&stacks, &payouts, algorithm == "exact");
+    let pressure_curve = if n <= 50 {
+        pressure::compute_pressure_curve(&stacks, &payouts, algorithm == "exact")
+    } else {
+        vec![]
+    };
 
     let elapsed = js_sys::Date::now() - start;
 
