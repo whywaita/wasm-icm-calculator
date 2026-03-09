@@ -279,14 +279,11 @@ fn error_empty_payouts() {
 }
 
 #[test]
-fn error_payouts_exceed_player_count() {
+fn allow_payouts_exceed_player_count() {
     let mut input = valid_standard_input();
-    // 2 players, 3 payout positions
+    // 2 players, 3 payout positions — extra positions are treated as already paid out
     input.prize_structure.payouts = vec![50.0, 30.0, 20.0];
-    let errors = validate(&input).unwrap_err();
-    assert!(errors
-        .iter()
-        .any(|e| e.message.contains("cannot exceed player count")));
+    assert!(validate(&input).is_ok());
 }
 
 #[test]

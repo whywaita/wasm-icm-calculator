@@ -279,6 +279,70 @@ fn multiple_validation_errors_collected() {
     );
 }
 
+/// Test that payouts exceeding player count works correctly.
+/// This models the common case where some players have already been eliminated
+/// and paid out (e.g., 3 remaining players with a 5-place payout structure).
+#[test]
+fn payouts_exceed_player_count_eliminated_players() {
+    // 3 remaining players, but payout structure was for 5 places.
+    // Positions 4th and 5th are already paid out to eliminated players.
+    let input = CalculationInput {
+        tournament_type: TournamentType::Standard,
+        players: vec![
+            PlayerInput {
+                name: Some("Alice".to_string()),
+                stack: 5000.0,
+                bounty: None,
+            },
+            PlayerInput {
+                name: Some("Bob".to_string()),
+                stack: 3000.0,
+                bounty: None,
+            },
+            PlayerInput {
+                name: Some("Charlie".to_string()),
+                stack: 2000.0,
+                bounty: None,
+            },
+        ],
+        prize_structure: PrizeStructure {
+            payout_type: PayoutType::Absolute,
+            payouts: vec![50.0, 30.0, 20.0, 10.0, 5.0],
+            total_prize_pool: Some(115.0),
+        },
+        pko_config: None,
+        breakeven: None,
+    };
+
+    // Validation should pass
+    assert!(validate(&input).is_ok());
+
+    // Compute equities using only the top 3 payout positions
+    let stacks: Vec<f64> = input.players.iter().map(|p| p.stack).collect();
+    let all_payouts = input.resolved_payouts();
+    let payouts: Vec<f64> = all_payouts.into_iter().take(stacks.len()).collect();
+    let equities = compute_equity_exact(&stacks, &payouts);
+
+    // Sum should equal the top 3 payouts (50+30+20=100), not the full 115
+    let sum: f64 = equities.iter().sum();
+    let top_payouts_sum: f64 = payouts.iter().sum();
+    assert!(
+        (sum - top_payouts_sum).abs() < 1e-10,
+        "Sum {} != top payouts sum {}",
+        sum,
+        top_payouts_sum
+    );
+
+    // Chip leader has max equity
+    assert!(equities[0] > equities[1]);
+    assert!(equities[1] > equities[2]);
+
+    // All equities are positive
+    for eq in &equities {
+        assert!(*eq > 0.0);
+    }
+}
+
 /// Test exact vs Monte Carlo convergence for small player counts.
 #[test]
 fn exact_vs_monte_carlo_convergence() {

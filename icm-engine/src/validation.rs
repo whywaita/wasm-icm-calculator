@@ -53,12 +53,8 @@ pub fn validate(input: &CalculationInput) -> Result<(), Vec<ValidationError>> {
             message: "At least 1 payout position is required".to_string(),
         });
     }
-    if payouts.len() > n {
-        errors.push(ValidationError {
-            field: "prizeStructure.payouts".to_string(),
-            message: "Payout positions cannot exceed player count".to_string(),
-        });
-    }
+    // payouts.len() > n is allowed: extra positions are treated as already paid out
+    // (e.g., 3 remaining players with a 5-place payout structure means 4th/5th are eliminated)
 
     let payout_sum: f64 = payouts.iter().sum();
     match input.prize_structure.payout_type {
