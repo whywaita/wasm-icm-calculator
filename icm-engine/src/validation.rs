@@ -1,0 +1,143 @@
+use crate::types::{CalculationInput, ValidationError};
+
+pub fn validate(input: &CalculationInput) -> Result<(), Vec<ValidationError>> {
+    let mut errors = Vec::new();
+
+    let n = input.players.len();
+    if n < 2 {
+        errors.push(ValidationError {
+            field: "players".to_string(),
+            message: "At least 2 players are required".to_string(),
+        });
+    }
+    if n > 50 {
+        errors.push(ValidationError {
+            field: "players".to_string(),
+            message: "Maximum 50 players supported".to_string(),
+        });
+    }
+
+    for (i, player) in input.players.iter().enumerate() {
+        if player.stack <= 0.0 {
+            errors.push(ValidationError {
+                field: format!("players[{}].stack", i),
+                message: "Stack must be positive".to_string(),
+            });
+        }
+
+        let needs_bounty = input.tournament_type == "bounty" || input.tournament_type == "pko";
+        if needs_bounty {
+            match player.bounty {
+                None => {
+                    errors.push(ValidationError {
+                        field: format!("players[{}].bounty", i),
+                        message: "Bounty is required for bounty/pko tournaments".to_string(),
+                    });
+                }
+                Some(b) if b < 0.0 => {
+                    errors.push(ValidationError {
+                        field: format!("players[{}].bounty", i),
+                        message: "Bounty must be non-negative".to_string(),
+                    });
+                }
+                _ => {}
+            }
+        }
+    }
+
+    let payouts = &input.prize_structure.payouts;
+    if payouts.is_empty() {
+        errors.push(ValidationError {
+            field: "prizeStructure.payouts".to_string(),
+            message: "At least 1 payout position is required".to_string(),
+        });
+    }
+    if payouts.len() > n {
+        errors.push(ValidationError {
+            field: "prizeStructure.payouts".to_string(),
+            message: "Payout positions cannot exceed player count".to_string(),
+        });
+    }
+
+    let payout_sum: f64 = payouts.iter().sum();
+    match input.prize_structure.payout_type.as_str() {
+        "percentage" => {
+            if let Some(pool) = input.prize_structure.total_prize_pool {
+                if pool <= 0.0 {
+                    errors.push(ValidationError {
+                        field: "prizeStructure.totalPrizePool".to_string(),
+                        message: "Total prize pool is required for percentage payouts".to_string(),
+                    });
+                }
+            } else {
+                errors.push(ValidationError {
+                    field: "prizeStructure.totalPrizePool".to_string(),
+                    message: "Total prize pool is required for percentage payouts".to_string(),
+                });
+            }
+
+            if (payout_sum - 100.0).abs() > 0.01 {
+                errors.push(ValidationError {
+                    field: "prizeStructure.payouts".to_string(),
+                    message: "Payout sum must equal 100% (percentage)".to_string(),
+                });
+            }
+        }
+        "absolute" => {
+            if let Some(pool) = input.prize_structure.total_prize_pool {
+                if payout_sum > pool + f64::EPSILON {
+                    errors.push(ValidationError {
+                        field: "prizeStructure.payouts".to_string(),
+                        message: "Payout sum must be within prize pool (absolute)".to_string(),
+                    });
+                }
+            }
+        }
+        _ => {}
+    }
+
+    if input.tournament_type == "pko" {
+        if let Some(ref config) = input.pko_config {
+            if config.inheritance_rate <= 0.0 || config.inheritance_rate > 1.0 {
+                errors.push(ValidationError {
+                    field: "pkoConfig.inheritanceRate".to_string(),
+                    message: "Inheritance rate must be between 0 (exclusive) and 1 (inclusive)"
+                        .to_string(),
+                });
+            }
+        }
+    }
+
+    if let Some(ref be) = input.breakeven {
+        if be.entry_fee <= 0.0 {
+            errors.push(ValidationError {
+                field: "breakeven.entryFee".to_string(),
+                message: "Entry fee must be positive".to_string(),
+            });
+        }
+        if be.rake < 0.0 || be.rake >= be.entry_fee {
+            errors.push(ValidationError {
+                field: "breakeven.rake".to_string(),
+                message: "Rake must be non-negative and less than entry fee".to_string(),
+            });
+        }
+        if (be.buy_in - (be.entry_fee - be.rake)).abs() > 0.01 {
+            errors.push(ValidationError {
+                field: "breakeven.buyIn".to_string(),
+                message: "Buy-in must equal entry fee minus rake".to_string(),
+            });
+        }
+        if be.starting_chips <= 0.0 {
+            errors.push(ValidationError {
+                field: "breakeven.startingChips".to_string(),
+                message: "Starting chips must be positive".to_string(),
+            });
+        }
+    }
+
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(errors)
+    }
+}
