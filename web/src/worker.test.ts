@@ -25,6 +25,6 @@ describe("worker validation error detection", () => {
       pressureCurve: [],
       metadata: { algorithm: "exact", playerCount: 2, calculationTimeMs: 1 },
     };
-    expect(result.error).toBeUndefined();
+    expect((result as Record<string, unknown>).error).toBeUndefined();
   });
 });
