@@ -5,7 +5,7 @@ use rand::{Rng, SeedableRng};
 pub fn compute_equity_monte_carlo(stacks: &[f64], payouts: &[f64], iterations: u32) -> Vec<f64> {
     let n = stacks.len();
     let num_paid = payouts.len();
-    let mut rng = SmallRng::from_entropy();
+    let mut rng = SmallRng::from_os_rng();
     let mut total_equity = vec![0.0; n];
 
     for _ in 0..iterations {
@@ -41,7 +41,7 @@ fn simulate_elimination_order(
         // players with probability proportional to their stack size (larger stack = more
         // likely to finish in a higher position). The selected player is removed from the
         // pool and awarded the next-best finishing position.
-        let r: f64 = rng.gen_range(0.0..total);
+        let r: f64 = rng.random_range(0.0..total);
         let mut cumulative = 0.0;
         let mut winner_idx = 0;
         for (idx, &player) in remaining.iter().enumerate() {
