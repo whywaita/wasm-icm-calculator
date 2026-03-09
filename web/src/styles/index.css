@@ -609,6 +609,14 @@ button {
   }
 }
 
+/* === MTT Simple Mode === */
+.mtt-payout-summary {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 0.95rem;
+}
+
 /* === Responsive === */
 @media (max-width: 640px) {
   .container {
