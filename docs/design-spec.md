@@ -125,7 +125,7 @@ The calculator supports three tournament types (Standard, Bounty KO, PKO), break
 
 ### FR-10: Breakeven Analysis
 
-- **Description**: When the user provides breakeven input (entry fee, buy-in, rake, starting chips), the engine computes breakeven metrics for each player.
+- **Description**: When the user provides breakeven input (entry fee, buy-in, rake, starting chips), the engine computes breakeven metrics for each player. The breakeven section is a collapsible panel (default: closed). Breakeven data is only sent to the engine when the panel is open.
 - **Entry Fee UI**: The user enters the total entry fee. The UI auto-calculates buy-in and rake (default rake: 10% of entry fee). The user can manually edit buy-in and rake. The constraint `entry_fee = buy_in + rake` is maintained by the UI.
 - **Formulas**:
   - `icm_dollar = ICM_equity(i)` (standard) or `Total_equity(i)` (bounty/pko)
@@ -134,6 +134,7 @@ The calculator supports three tournament types (Standard, Bounty KO, PKO), break
   - `chip_ev_per_starting_chip = buy_in / starting_chips`
   - `current_chip_ev = stack(i) * chip_ev_per_starting_chip`
   - `icm_premium = icm_dollar / current_chip_ev`
+- **Chart integration**: When breakeven is enabled, a horizontal red dashed line representing the entry fee is drawn on both the Equity Bar Chart (FR-12) and ICM Pressure Curve (FR-13). In the Equity Bar Chart, bars are color-coded: teal for players whose equity meets or exceeds the entry fee, red for those below.
 - **Success**: Returns `BreakevenResult` for each player.
 - **Failure**: Validation errors if entry fee <= 0, rake < 0, rake >= entry fee, or starting chips <= 0.
 
@@ -152,14 +153,16 @@ The calculator supports three tournament types (Standard, Bounty KO, PKO), break
 - **Description**: A horizontal or vertical bar chart showing each player's equity.
 - **Standard**: Bars represent ICM$.
 - **Bounty/PKO**: Stacked bars showing ICM$ and Bounty Equity portions.
+- **Breakeven enabled**: A horizontal red dashed line is drawn at the entry fee level. Bar colors are conditionally set: teal (equity >= entry fee) or red (equity < entry fee). For Bounty/PKO, the comparison uses `totalEquity`. The chart legend is shown when bounty or breakeven is active.
 - **Success**: The chart renders with correct proportions and labels.
 - **Failure**: N/A.
 
 ### FR-13: ICM Pressure Curve
 
 - **Description**: A single line chart showing the relationship between a hypothetical chip stack and ICM$ value across the current player field. The curve is computed by the WASM engine as part of the `calculate()` response (not via separate API calls), reusing the memoization cache from the main calculation.
-- **X-axis**: Chip stack (from 0 to max stack in the field).
-- **Y-axis**: Corresponding ICM$ value.
+- **X-axis**: Chip stack (from 0 to max stack in the field). Label: "Stack (chips)". Tick values are formatted with thousands separators.
+- **Y-axis**: Corresponding ICM$ value. Label: "ICM$ ($)". Tick values are formatted as `$1,000`.
+- **Breakeven enabled**: A horizontal red dashed line is drawn at the entry fee level. The chart legend is shown when breakeven is active.
 - **Data points**: Dynamic based on algorithm — exact: 20 points, Monte Carlo: 50 points. Each player's actual position is marked on the curve as a dot.
 - **Computation**: The engine varies a hypothetical player's stack while holding all other players' stacks constant, computing ICM$ at each point.
 - **Success**: The curve is rendered, showing the diminishing marginal value of chips (ICM pressure).
