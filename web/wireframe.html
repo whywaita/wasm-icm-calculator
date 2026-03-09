@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICM Calculator</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --surface-alt: #f5f5f4;
+    --border: #e7e5e4;
+    --border-focus: #0d9488;
+    --text: #1c1917;
+    --text-secondary: #57534e;
+    --text-tertiary: #a8a29e;
+    --accent: #0d9488;
+    --accent-light: #ccfbf1;
+    --accent-hover: #0f766e;
+    --positive: #059669;
+    --positive-bg: #ecfdf5;
+    --negative: #dc2626;
+    --negative-bg: #fef2f2;
+    --gold: #b45309;
+    --font: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.03);
+    --transition: 150ms ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* === Header === */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 32px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .logo h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .logo h1 span { color: var(--text-tertiary); font-weight: 400; }
+
+  .lang-toggle {
+    display: flex;
+    background: var(--surface-alt);
+    border-radius: 6px;
+    padding: 2px;
+  }
+  .lang-toggle button {
+    font-family: var(--font);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .lang-toggle button.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* === Card === */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 12px;
+    transition: box-shadow var(--transition);
+  }
+  .card:hover { box-shadow: var(--shadow); }
+
+  .card-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 16px;
+  }
+
+  /* === Radio pills === */
+  .pill-group {
+    display: inline-flex;
+    background: var(--surface-alt);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .pill-group label {
+    display: block;
+    padding: 9px 22px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all var(--transition);
+    user-select: none;
+  }
+  .pill-group input[type="radio"] { display: none; }
+  .pill-group label:has(input:checked) {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+  .pill-group label:hover:not(:has(input:checked)) {
+    color: var(--text);
+  }
+
+  /* === Tables === */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    padding: 0 14px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 14px;
+    font-size: 1rem;
+    border-bottom: 1px solid var(--surface-alt);
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background var(--transition); }
+  tbody tr:hover { background: var(--surface-alt); }
+
+  /* === Inputs === */
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    font-family: var(--font);
+    font-size: 1rem;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    outline: none;
+    transition: all var(--transition);
+  }
+  input[type="number"] { font-family: var(--mono); font-size: 0.95rem; width: 130px; }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
+  textarea { width: 100%; resize: vertical; font-family: var(--mono); font-size: 0.95rem; line-height: 1.6; }
+  select {
+    cursor: pointer;
+    appearance: none;
+    padding-right: 32px;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23a8a29e' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  /* === Buttons === */
+  button {
+    font-family: var(--font);
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition);
+  }
+
+  .btn-outline {
+    font-size: 0.92rem;
+    font-weight: 500;
+    padding: 8px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+  }
+  .btn-outline:hover { border-color: var(--text-tertiary); color: var(--text); }
+
+  .btn-sm {
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+  }
+  .btn-sm:hover { background: var(--surface-alt); }
+  .btn-remove {
+    color: var(--text-tertiary);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+  }
+  .btn-remove:hover { background: var(--negative-bg); color: var(--negative); }
+
+  .btn-primary {
+    font-size: 1.05rem;
+    font-weight: 600;
+    padding: 14px 48px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius);
+    letter-spacing: -0.01em;
+    box-shadow: 0 1px 3px rgba(13,148,136,0.3);
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 2px 8px rgba(13,148,136,0.3);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  /* === Layout utilities === */
+  .hidden { display: none !important; }
+  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .field { display: flex; align-items: center; gap: 10px; }
+  .field-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  /* === Collapsible === */
+  .collapse-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .collapse-trigger .card-label { margin-bottom: 0; }
+  .collapse-chevron {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+    transition: transform var(--transition);
+    font-size: 0.75rem;
+  }
+  .collapse-trigger.open .collapse-chevron { transform: rotate(90deg); }
+
+  .collapse-body {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+    padding-top: 0;
+  }
+  .collapse-body.open {
+    max-height: 400px;
+    opacity: 1;
+    padding-top: 16px;
+  }
+
+  /* === Breakeven split === */
+  .be-display {
+    display: inline-flex;
+    gap: 16px;
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    margin: 8px 0;
+  }
+  .be-display .be-item { font-size: 0.95rem; color: var(--text-secondary); }
+  .be-display .be-val { font-family: var(--mono); font-weight: 500; color: var(--text); font-size: 0.95rem; }
+
+  /* === Running total === */
+  .running-total {
+    font-family: var(--mono);
+    font-size: 0.92rem;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: var(--surface-alt);
+    color: var(--text-secondary);
+  }
+  .running-total.valid { background: var(--positive-bg); color: var(--positive); }
+  .running-total.invalid { background: var(--negative-bg); color: var(--negative); }
+
+  /* === Results === */
+  .results-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 32px 0 20px;
+  }
+  .results-divider h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+  .results-divider .line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  #results-table th {
+    cursor: pointer;
+  }
+  #results-table th:hover { color: var(--text-secondary); }
+  .sort-indicator { font-size: 0.7rem; color: var(--accent); margin-left: 3px; }
+
+  #results-table td {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+  }
+  .player-name { font-family: var(--font); font-weight: 600; color: var(--text); font-size: 1rem; }
+  .val-accent { color: var(--accent); font-weight: 500; }
+  .val-gold { color: var(--gold); font-weight: 500; }
+  .val-positive { color: var(--positive); font-weight: 500; }
+  .val-negative { color: var(--negative); font-weight: 500; }
+
+  /* === Chart placeholder === */
+  .chart-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin: 24px 0 8px;
+  }
+  .chart-placeholder {
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: 56px 24px;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 0.95rem;
+    background: var(--surface);
+  }
+
+  /* === Metadata === */
+  .meta-bar {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+    padding: 12px 18px;
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+  }
+  .meta-bar .meta-label { color: var(--text-tertiary); margin-right: 4px; }
+  .meta-bar .meta-val { font-family: var(--mono); font-weight: 500; color: var(--text-secondary); }
+
+  /* === Animation === */
+  .card { animation: fadeIn 0.3s ease both; }
+  .card:nth-child(2) { animation-delay: 30ms; }
+  .card:nth-child(3) { animation-delay: 60ms; }
+  .card:nth-child(4) { animation-delay: 90ms; }
+  .card:nth-child(5) { animation-delay: 120ms; }
+  .card:nth-child(6) { animation-delay: 150ms; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #results-section .card { animation: slideUp 0.4s ease both; }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === Responsive === */
+  @media (max-width: 640px) {
+    .container { padding: 0 12px 60px; }
+    header { padding: 16px 0; margin-bottom: 20px; }
+    .card { padding: 16px; }
+    .pill-group label { padding: 7px 14px; font-size: 0.88rem; }
+    input[type="number"] { width: 110px; }
+    .meta-bar { flex-wrap: wrap; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ===== Header ===== -->
+<header>
+  <div class="logo">
+    <div class="logo-mark">IC</div>
+    <h1 id="app-title">ICM <span>Calculator</span></h1>
+  </div>
+  <div class="lang-toggle">
+    <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+    <button id="btn-ja" onclick="setLang('ja')">JA</button>
+  </div>
+</header>
+
+<!-- ===== Tournament Type (FR-1) ===== -->
+<div class="card">
+  <div class="card-label" id="lbl-tournament-type">Tournament Type</div>
+  <div class="pill-group">
+    <label><input type="radio" name="tournamentType" value="standard" checked onchange="onTypeChange()">Standard</label>
+    <label><input type="radio" name="tournamentType" value="bounty" onchange="onTypeChange()">Bounty</label>
+    <label><input type="radio" name="tournamentType" value="pko" onchange="onTypeChange()">PKO</label>
+  </div>
+</div>
+
+<!-- ===== Players (FR-2) ===== -->
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div class="card-label" id="lbl-players" style="margin-bottom:0;">Players</div>
+    <button class="btn-outline" id="btn-mode-toggle" onclick="toggleInputMode()">Switch to CSV</button>
+  </div>
+
+  <div id="table-mode">
+    <table id="player-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Stack</th>
+          <th id="th-bounty" class="hidden">Bounty</th>
+          <th style="width:40px;"></th>
+        </tr>
+      </thead>
+      <tbody id="player-tbody"></tbody>
+    </table>
+    <div style="margin-top:10px;">
+      <button class="btn-sm" onclick="addPlayerRow()">+ Add Player</button>
+    </div>
+  </div>
+
+  <div id="csv-mode" class="hidden">
+    <p style="font-size:0.92rem;color:var(--text-tertiary);margin-bottom:8px;" id="csv-hint">Format: name,stack (or name,stack,bounty for Bounty/PKO)</p>
+    <textarea id="csv-input" rows="6" placeholder="Alice,5000&#10;Bob,3000&#10;Carol,2000"></textarea>
+  </div>
+</div>
+
+<!-- ===== Payout Structure (FR-3) ===== -->
+<div class="card">
+  <div class="card-label" id="lbl-payouts">Payout Structure</div>
+  <div class="row" style="margin-bottom:12px;">
+    <div class="pill-group">
+      <label><input type="radio" name="payoutType" value="percentage" checked onchange="onPayoutTypeChange()">Percentage</label>
+      <label><input type="radio" name="payoutType" value="absolute" onchange="onPayoutTypeChange()">Absolute</label>
+    </div>
+  </div>
+  <div class="row" style="margin-bottom:12px;">
+    <div class="field">
+      <span class="field-label" id="lbl-preset">Preset:</span>
+      <select id="preset-select" onchange="applyPreset()">
+        <option value="">-- Select --</option>
+        <option value="50/30/20">50 / 30 / 20</option>
+        <option value="40/30/20/10">40 / 30 / 20 / 10</option>
+        <option value="65/25/10">65 / 25 / 10 (Winner-heavy)</option>
+        <option value="standard-mtt-9">Standard MTT (9-player)</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="prize-pool-row" class="field" style="margin-bottom:12px;">
+    <span class="field-label" id="lbl-prize-pool">Total Prize Pool:</span>
+    <input type="number" id="total-prize-pool" value="1000" min="0" step="1">
+  </div>
+
+  <table id="payout-table">
+    <thead>
+      <tr><th>Position</th><th>Amount</th><th style="width:40px;"></th></tr>
+    </thead>
+    <tbody id="payout-tbody"></tbody>
+  </table>
+  <div class="row" style="margin-top:10px;">
+    <button class="btn-sm" onclick="addPayoutRow()">+ Add Position</button>
+    <span id="payout-running-total" class="running-total">Total: 0%</span>
+  </div>
+</div>
+
+<!-- ===== PKO Settings (FR-5) ===== -->
+<div class="card hidden" id="pko-settings">
+  <div class="card-label">PKO Settings</div>
+  <div class="field">
+    <span class="field-label" id="lbl-inheritance">Inheritance Rate:</span>
+    <input type="number" id="inheritance-rate" value="0.5" min="0.01" max="1" step="0.01">
+    <span style="font-size:0.92rem;color:var(--text-tertiary);">(0 &lt; rate &le; 1)</span>
+  </div>
+</div>
+
+<!-- ===== Breakeven (FR-10) ===== -->
+<div class="card">
+  <div class="collapse-trigger" id="breakeven-header" onclick="toggleBreakeven()">
+    <div class="collapse-chevron">&#9654;</div>
+    <div class="card-label" style="margin-bottom:0;">Breakeven Analysis</div>
+    <span style="font-size:0.82rem;color:var(--text-tertiary);font-weight:400;">optional</span>
+  </div>
+  <div class="collapse-body" id="breakeven-body">
+    <div class="row" style="gap:20px;">
+      <div class="field">
+        <span class="field-label" id="lbl-entry-fee">Entry Fee:</span>
+        <input type="number" id="entry-fee" value="110" min="0" step="1" oninput="calcBreakevenSplit()">
+      </div>
+      <div class="field">
+        <span class="field-label" id="lbl-rake-pct">Rake %:</span>
+        <input type="number" id="rake-pct" value="10" min="0" max="100" step="0.1" oninput="calcBreakevenSplit()" style="width:80px;">
+      </div>
+    </div>
+    <div class="be-display" id="breakeven-split">
+      <div class="be-item">Buy-in: <span class="be-val" id="be-buyin">99.00</span></div>
+      <div class="be-item">Rake: <span class="be-val" id="be-rake">11.00</span></div>
+    </div>
+    <div class="field">
+      <span class="field-label" id="lbl-starting-chips">Starting Chips:</span>
+      <input type="number" id="starting-chips" value="10000" min="1" step="1">
+    </div>
+  </div>
+</div>
+
+<!-- ===== Calculate (FR-6) ===== -->
+<div style="margin:24px 0;text-align:center;">
+  <button class="btn-primary" id="btn-calculate" onclick="calculate()">Calculate</button>
+</div>
+
+<!-- ===== Results (FR-11, FR-12, FR-13) ===== -->
+<div id="results-section" class="hidden">
+  <div class="results-divider">
+    <h2 id="lbl-results">Results</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="card">
+    <table id="results-table">
+      <thead id="results-thead"></thead>
+      <tbody id="results-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="chart-label" id="lbl-chart-equity">Equity Bar Chart</div>
+  <div class="chart-placeholder" id="chart-equity">[Chart: Equity Bar]</div>
+
+  <div class="chart-label" id="lbl-chart-pressure">ICM Pressure Curve</div>
+  <div class="chart-placeholder" id="chart-pressure">[Chart: Pressure Curve]</div>
+
+  <div class="meta-bar" id="result-metadata"></div>
+</div>
+
+</div>
+
+<script>
+// ===== State =====
+let inputMode = 'table';
+let lang = 'en';
+let breakevenOpen = false;
+let sortCol = null;
+let sortAsc = true;
+
+// ===== i18n =====
+const i18n = {
+  en: {
+    title: 'ICM <span>Calculator</span>',
+    tournamentType: 'Tournament Type',
+    players: 'Players',
+    payouts: 'Payout Structure',
+    preset: 'Preset:',
+    prizePool: 'Total Prize Pool:',
+    inheritance: 'Inheritance Rate:',
+    entryFee: 'Entry Fee:',
+    rakePct: 'Rake %:',
+    startingChips: 'Starting Chips:',
+    breakeven: 'Breakeven Analysis',
+    results: 'Results',
+    chartEquity: 'Equity Bar Chart',
+    chartPressure: 'ICM Pressure Curve',
+    csvHint: 'Format: name,stack (or name,stack,bounty for Bounty/PKO)',
+    switchCsv: 'Switch to CSV',
+    switchTable: 'Switch to Table',
+  },
+  ja: {
+    title: 'ICM <span>Calculator</span>',
+    tournamentType: 'トーナメントタイプ',
+    players: 'プレイヤー',
+    payouts: 'ペイアウト構造',
+    preset: 'プリセット:',
+    prizePool: 'トータルプライズプール:',
+    inheritance: '継承率:',
+    entryFee: 'エントリーフィー:',
+    rakePct: 'レーキ %:',
+    startingChips: 'スターティングチップ:',
+    breakeven: 'ブレイクイーブン分析',
+    results: '結果',
+    chartEquity: 'エクイティ棒グラフ',
+    chartPressure: 'ICMプレッシャーカーブ',
+    csvHint: 'フォーマット: name,stack (Bounty/PKOの場合 name,stack,bounty)',
+    switchCsv: 'CSVに切替',
+    switchTable: 'テーブルに切替',
+  }
+};
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-ja').classList.toggle('active', l === 'ja');
+  var t = i18n[l];
+  document.getElementById('app-title').innerHTML = t.title;
+  document.getElementById('lbl-tournament-type').textContent = t.tournamentType;
+  document.getElementById('lbl-players').textContent = t.players;
+  document.getElementById('lbl-payouts').textContent = t.payouts;
+  document.getElementById('lbl-preset').textContent = t.preset;
+  document.getElementById('lbl-prize-pool').textContent = t.prizePool;
+  document.getElementById('lbl-inheritance').textContent = t.inheritance;
+  document.getElementById('lbl-entry-fee').textContent = t.entryFee;
+  document.getElementById('lbl-rake-pct').textContent = t.rakePct;
+  document.getElementById('lbl-starting-chips').textContent = t.startingChips;
+  document.getElementById('lbl-results').textContent = t.results;
+  document.getElementById('lbl-chart-equity').textContent = t.chartEquity;
+  document.getElementById('lbl-chart-pressure').textContent = t.chartPressure;
+  document.getElementById('csv-hint').textContent = t.csvHint;
+  document.getElementById('btn-mode-toggle').textContent = inputMode === 'table' ? t.switchCsv : t.switchTable;
+}
+
+// ===== Tournament Type =====
+function getType() {
+  return document.querySelector('input[name="tournamentType"]:checked').value;
+}
+
+function onTypeChange() {
+  var type = getType();
+  var showBounty = type === 'bounty' || type === 'pko';
+  document.getElementById('th-bounty').classList.toggle('hidden', !showBounty);
+  document.querySelectorAll('.bounty-cell').forEach(function(el) { el.classList.toggle('hidden', !showBounty); });
+  document.getElementById('pko-settings').classList.toggle('hidden', type !== 'pko');
+}
+
+// ===== Player Table =====
+function createPlayerRow(name, stack, bounty) {
+  var tr = document.createElement('tr');
+  var showBounty = getType() === 'bounty' || getType() === 'pko';
+  tr.innerHTML =
+    '<td><input type="text" value="' + name + '" style="width:120px;"></td>' +
+    '<td><input type="number" value="' + stack + '" min="1"></td>' +
+    '<td class="bounty-cell ' + (showBounty ? '' : 'hidden') + '"><input type="number" value="' + bounty + '" min="0" style="width:100px;"></td>' +
+    '<td><button class="btn-remove" onclick="removePlayerRow(this)">&times;</button></td>';
+  return tr;
+}
+
+function addPlayerRow() {
+  var tbody = document.getElementById('player-tbody');
+  tbody.appendChild(createPlayerRow('Player ' + (tbody.rows.length + 1), 1000, 10));
+}
+
+function removePlayerRow(btn) {
+  var tbody = document.getElementById('player-tbody');
+  if (tbody.rows.length <= 2) return;
+  btn.closest('tr').remove();
+}
+
+function initPlayers() {
+  var tbody = document.getElementById('player-tbody');
+  tbody.innerHTML = '';
+  tbody.appendChild(createPlayerRow('Alice', 5000, 10));
+  tbody.appendChild(createPlayerRow('Bob', 3000, 10));
+  tbody.appendChild(createPlayerRow('Carol', 2000, 10));
+}
+
+// ===== Input Mode Toggle =====
+function toggleInputMode() {
+  if (inputMode === 'table') {
+    var rows = document.getElementById('player-tbody').rows;
+    var showBounty = getType() === 'bounty' || getType() === 'pko';
+    var csv = '';
+    for (var i = 0; i < rows.length; i++) {
+      var inputs = rows[i].querySelectorAll('input');
+      csv += showBounty
+        ? inputs[0].value + ',' + inputs[1].value + ',' + inputs[2].value + '\n'
+        : inputs[0].value + ',' + inputs[1].value + '\n';
+    }
+    document.getElementById('csv-input').value = csv.trim();
+    inputMode = 'csv';
+  } else {
+    var lines = document.getElementById('csv-input').value.trim().split('\n').filter(function(l) { return l.trim(); });
+    var tbody = document.getElementById('player-tbody');
+    tbody.innerHTML = '';
+    for (var j = 0; j < lines.length; j++) {
+      var parts = lines[j].split(',').map(function(s) { return s.trim(); });
+      tbody.appendChild(createPlayerRow(parts[0] || '', parseInt(parts[1]) || 1000, parseInt(parts[2]) || 10));
+    }
+    while (tbody.rows.length < 2) {
+      tbody.appendChild(createPlayerRow('Player ' + (tbody.rows.length + 1), 1000, 10));
+    }
+    inputMode = 'table';
+  }
+  document.getElementById('table-mode').classList.toggle('hidden', inputMode === 'csv');
+  document.getElementById('csv-mode').classList.toggle('hidden', inputMode === 'table');
+  document.getElementById('btn-mode-toggle').textContent = inputMode === 'table' ? i18n[lang].switchCsv : i18n[lang].switchTable;
+}
+
+// ===== Payout =====
+function getPayoutType() {
+  return document.querySelector('input[name="payoutType"]:checked').value;
+}
+
+function onPayoutTypeChange() {
+  document.getElementById('prize-pool-row').classList.toggle('hidden', getPayoutType() !== 'percentage');
+  updatePayoutTotal();
+}
+
+function createPayoutRow(position, amount) {
+  var tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td style="font-family:var(--mono);font-size:0.95rem;color:var(--text-secondary);">' + position + '</td>' +
+    '<td><input type="number" value="' + amount + '" min="0" step="0.01" oninput="updatePayoutTotal()"></td>' +
+    '<td><button class="btn-remove" onclick="removePayoutRow(this)">&times;</button></td>';
+  return tr;
+}
+
+function addPayoutRow() {
+  var tbody = document.getElementById('payout-tbody');
+  tbody.appendChild(createPayoutRow(ordinal(tbody.rows.length + 1), 0));
+  updatePayoutTotal();
+}
+
+function removePayoutRow(btn) {
+  var tbody = document.getElementById('payout-tbody');
+  if (tbody.rows.length <= 1) return;
+  btn.closest('tr').remove();
+  Array.from(tbody.rows).forEach(function(row, i) { row.cells[0].textContent = ordinal(i + 1); });
+  updatePayoutTotal();
+}
+
+function ordinal(n) {
+  var s = ['th','st','nd','rd'];
+  var v = n % 100;
+  return n + (s[(v-20)%10] || s[v] || s[0]);
+}
+
+function updatePayoutTotal() {
+  var tbody = document.getElementById('payout-tbody');
+  var total = 0;
+  for (var i = 0; i < tbody.rows.length; i++) {
+    total += parseFloat(tbody.rows[i].querySelector('input').value) || 0;
+  }
+  var isPct = getPayoutType() === 'percentage';
+  var el = document.getElementById('payout-running-total');
+  el.textContent = isPct ? 'Total: ' + total.toFixed(1) + '%' : 'Total: ' + total.toFixed(2);
+  el.classList.remove('valid', 'invalid');
+  if (isPct) el.classList.add(Math.abs(total - 100) < 0.1 ? 'valid' : 'invalid');
+}
+
+function initPayouts() {
+  var tbody = document.getElementById('payout-tbody');
+  tbody.innerHTML = '';
+  tbody.appendChild(createPayoutRow('1st', 50));
+  tbody.appendChild(createPayoutRow('2nd', 30));
+  tbody.appendChild(createPayoutRow('3rd', 20));
+  updatePayoutTotal();
+}
+
+function applyPreset() {
+  var val = document.getElementById('preset-select').value;
+  if (!val) return;
+  var presets = {
+    '50/30/20': [50, 30, 20],
+    '40/30/20/10': [40, 30, 20, 10],
+    '65/25/10': [65, 25, 10],
+    'standard-mtt-9': [30, 20, 14, 10.5, 8, 6.5, 5, 3.5, 2.5],
+  };
+  var values = presets[val];
+  if (!values) return;
+  var tbody = document.getElementById('payout-tbody');
+  tbody.innerHTML = '';
+  values.forEach(function(v, i) { tbody.appendChild(createPayoutRow(ordinal(i + 1), v)); });
+  document.querySelector('input[name="payoutType"][value="percentage"]').checked = true;
+  onPayoutTypeChange();
+  updatePayoutTotal();
+}
+
+// ===== Breakeven =====
+function toggleBreakeven() {
+  breakevenOpen = !breakevenOpen;
+  document.getElementById('breakeven-body').classList.toggle('open', breakevenOpen);
+  document.getElementById('breakeven-header').classList.toggle('open', breakevenOpen);
+  if (breakevenOpen) calcBreakevenSplit();
+}
+
+function calcBreakevenSplit() {
+  var fee = parseFloat(document.getElementById('entry-fee').value) || 0;
+  var rakePct = parseFloat(document.getElementById('rake-pct').value) || 0;
+  var rake = fee * rakePct / 100;
+  document.getElementById('be-buyin').textContent = (fee - rake).toFixed(2);
+  document.getElementById('be-rake').textContent = rake.toFixed(2);
+}
+
+// ===== Calculate =====
+function calculate() {
+  var type = getType();
+  var showBounty = type === 'bounty' || type === 'pko';
+  var showBreakeven = breakevenOpen;
+
+  var entryFee = parseFloat(document.getElementById('entry-fee').value) || 110;
+  var rakePct = parseFloat(document.getElementById('rake-pct').value) || 10;
+  var rake = entryFee * rakePct / 100;
+  var buyIn = entryFee - rake;
+  var startingChips = parseFloat(document.getElementById('starting-chips').value) || 10000;
+  var chipEvPerStarting = buyIn / startingChips;
+
+  var players = [
+    { name: 'Alice', stack: 5000, stackPct: 50.00, icm: 420.83, icmPct: 42.08, bountyEq: 6.25, totalEq: 427.08 },
+    { name: 'Bob',   stack: 3000, stackPct: 30.00, icm: 312.50, icmPct: 31.25, bountyEq: 3.75, totalEq: 316.25 },
+    { name: 'Carol', stack: 2000, stackPct: 20.00, icm: 266.67, icmPct: 26.67, bountyEq: 2.50, totalEq: 269.17 },
+  ];
+
+  var cols = [
+    { key: 'player', label: 'Player' },
+    { key: 'stack', label: 'Stack' },
+    { key: 'stackpct', label: 'Stack %' },
+    { key: 'icm', label: 'ICM$' },
+    { key: 'icmpct', label: 'ICM$ %' },
+  ];
+  if (showBounty) {
+    cols.push({ key: 'bountyeq', label: 'Bounty Eq' });
+    cols.push({ key: 'totaleq', label: 'Total Eq' });
+  }
+  if (showBreakeven) {
+    cols.push({ key: 'entryfee', label: 'Entry Fee' });
+    cols.push({ key: 'pl', label: 'P/L' });
+    cols.push({ key: 'icmprem', label: 'ICM Prem' });
+  }
+
+  var thead = document.getElementById('results-thead');
+  var hdr = '<tr>';
+  cols.forEach(function(c) {
+    hdr += '<th onclick="toggleSort(\'' + c.key + '\')">' + c.label + '<span class="sort-indicator" id="sort-' + c.key + '"></span></th>';
+  });
+  thead.innerHTML = hdr + '</tr>';
+
+  var tbody = document.getElementById('results-tbody');
+  tbody.innerHTML = '';
+  players.forEach(function(p) {
+    var icmDollar = showBounty ? p.totalEq : p.icm;
+    var profitLoss = icmDollar - entryFee;
+    var currentChipEv = p.stack * chipEvPerStarting;
+    var icmPremium = currentChipEv > 0 ? (icmDollar / currentChipEv) : 0;
+    var aboveBE = profitLoss > 0;
+
+    var row = '<tr>';
+    row += '<td class="player-name">' + p.name + '</td>';
+    row += '<td>' + p.stack.toLocaleString() + '</td>';
+    row += '<td>' + p.stackPct.toFixed(2) + '%</td>';
+    row += '<td class="val-gold">' + p.icm.toFixed(2) + '</td>';
+    row += '<td>' + p.icmPct.toFixed(2) + '%</td>';
+    if (showBounty) {
+      row += '<td class="val-accent">' + p.bountyEq.toFixed(2) + '</td>';
+      row += '<td class="val-gold">' + p.totalEq.toFixed(2) + '</td>';
+    }
+    if (showBreakeven) {
+      row += '<td>' + entryFee.toFixed(2) + '</td>';
+      row += '<td class="' + (aboveBE ? 'val-positive' : 'val-negative') + '">' + (profitLoss >= 0 ? '+' : '') + profitLoss.toFixed(2) + '</td>';
+      row += '<td>' + icmPremium.toFixed(2) + 'x</td>';
+    }
+    row += '</tr>';
+    tbody.innerHTML += row;
+  });
+
+  document.getElementById('chart-equity').textContent = showBounty
+    ? '[Chart: Stacked Equity Bar \u2014 ICM$ + Bounty Equity]'
+    : '[Chart: Equity Bar \u2014 ICM$ per player]';
+
+  document.getElementById('result-metadata').innerHTML =
+    '<span><span class="meta-label">Algorithm:</span><span class="meta-val">exact</span></span>' +
+    '<span><span class="meta-label">Players:</span><span class="meta-val">3</span></span>' +
+    '<span><span class="meta-label">Time:</span><span class="meta-val">1.5ms</span></span>';
+
+  document.getElementById('results-section').classList.remove('hidden');
+}
+
+function toggleSort(col) {
+  document.querySelectorAll('.sort-indicator').forEach(function(el) { el.textContent = ''; });
+  var el = document.getElementById('sort-' + col);
+  if (!el) return;
+  if (sortCol === col && sortAsc) {
+    sortAsc = false;
+    el.textContent = ' \u25BC';
+  } else {
+    sortCol = col;
+    sortAsc = true;
+    el.textContent = ' \u25B2';
+  }
+}
+
+// ===== Init =====
+initPlayers();
+initPayouts();
+calcBreakevenSplit();
+</script>
+</body>
+</html>
