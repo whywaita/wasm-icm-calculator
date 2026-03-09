@@ -51,8 +51,12 @@ fn compute(input: &CalculationInput) -> CalculationResult {
 
     let stacks = input.players.iter().map(|p| p.stack).collect::<Vec<_>>();
     let total_chips: f64 = stacks.iter().sum();
-    let payouts = input.resolved_payouts();
+    let all_payouts = input.resolved_payouts();
     let n = stacks.len();
+
+    // Truncate payouts to current player count: positions beyond n are
+    // treated as already paid out to eliminated players.
+    let payouts: Vec<f64> = all_payouts.into_iter().take(n).collect();
 
     let algorithm = if n <= EXACT_PLAYER_THRESHOLD {
         "exact"
