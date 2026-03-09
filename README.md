@@ -93,4 +93,4 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 
 ## License
 
-Apache 2.0
+See [LICENSE](LICENSE).
