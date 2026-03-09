@@ -176,6 +176,22 @@ mod tests {
     }
 
     #[test]
+    fn test_ten_players_completes() {
+        // 10 players is the exact threshold boundary; must complete quickly.
+        let stacks: Vec<f64> = (1..=10).map(|i| i as f64 * 1000.0).collect();
+        let payouts = vec![50.0, 30.0, 20.0];
+        let equities = compute_equity_exact(&stacks, &payouts);
+        let sum: f64 = equities.iter().sum();
+        assert!(
+            (sum - 100.0).abs() < 1e-6,
+            "Sum of equities should equal prize pool: {}",
+            sum
+        );
+        // Chip leader should have the highest equity
+        assert!(equities[9] > equities[0]);
+    }
+
+    #[test]
     fn test_equal_stacks_equal_equity() {
         let stacks = vec![5000.0, 5000.0, 5000.0];
         let payouts = vec![50.0, 30.0, 20.0];
