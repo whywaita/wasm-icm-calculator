@@ -21,4 +21,14 @@ describe("estimateCalcTime", () => {
     const result = estimateCalcTime(26);
     expect(result).toEqual({ algorithm: "approximate", timeKey: "moderate" });
   });
+
+  it("returns approximate/moderate for 40 players (boundary)", () => {
+    const result = estimateCalcTime(40);
+    expect(result).toEqual({ algorithm: "approximate", timeKey: "moderate" });
+  });
+
+  it("returns approximate/slow for 41 players (boundary)", () => {
+    const result = estimateCalcTime(41);
+    expect(result).toEqual({ algorithm: "approximate", timeKey: "slow" });
+  });
 });

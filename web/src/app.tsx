@@ -168,6 +168,7 @@ export function App() {
       approximate: {
         fast: "estimateApproxFast",
         moderate: "estimateApproxModerate",
+        slow: "estimateApproxSlow",
       },
     };
     const i18nKey = keyMap[est.algorithm]?.[est.timeKey];

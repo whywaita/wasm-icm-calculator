@@ -85,5 +85,6 @@
   "mttPayoutPreview": "上位3位:",
   "estimateExactInstant": "厳密計算 — 1秒未満",
   "estimateApproxFast": "近似計算 (モンテカルロ) — 約1-3秒",
-  "estimateApproxModerate": "近似計算 (モンテカルロ) — 約3-10秒"
+  "estimateApproxModerate": "近似計算 (モンテカルロ) — 約3-10秒",
+  "estimateApproxSlow": "近似計算 (モンテカルロ) — 約10-30秒"
 }
