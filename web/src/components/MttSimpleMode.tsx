@@ -5,6 +5,7 @@ import { generateMttPayouts, MTT_PAYOUT_PRESETS } from "../utils/mttPayouts";
 export interface MttSimpleState {
   entryFee: number;
   rakePct: number;
+  payoutRate: number;
   startingChips: number;
   totalEntries: number;
   remainingPlayers: number;
@@ -21,7 +22,7 @@ interface MttSimpleModeProps {
 export function MttSimpleMode({ t, state, onUpdate }: MttSimpleModeProps) {
   const rake = state.entryFee * (state.rakePct / 100);
   const buyIn = state.entryFee - rake;
-  const prizePool = buyIn * state.totalEntries;
+  const prizePool = buyIn * state.totalEntries * (state.payoutRate / 100);
   const totalChips = state.startingChips * state.totalEntries;
   const avgStack = state.remainingPlayers > 1
     ? (totalChips - state.myStack) / (state.remainingPlayers - 1)
@@ -76,6 +77,18 @@ export function MttSimpleMode({ t, state, onUpdate }: MttSimpleModeProps) {
               step={0.1}
               style={{ width: "80px" }}
               onInput={(e) => set({ rakePct: num(e) })}
+            />
+          </div>
+          <div class="field">
+            <span class="field-label">{t("mttPayoutRate")}</span>
+            <input
+              type="number"
+              value={state.payoutRate}
+              min={1}
+              max={100}
+              step={0.1}
+              style={{ width: "80px" }}
+              onInput={(e) => set({ payoutRate: Math.min(100, Math.max(1, num(e))) })}
             />
           </div>
         </div>

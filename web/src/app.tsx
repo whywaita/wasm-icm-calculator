@@ -51,6 +51,7 @@ const DEFAULT_BREAKEVEN: BreakevenFormState = {
 const DEFAULT_MTT_SIMPLE: MttSimpleState = {
   entryFee: 110,
   rakePct: 10,
+  payoutRate: 100,
   startingChips: 10000,
   totalEntries: 100,
   remainingPlayers: 20,
@@ -116,7 +117,7 @@ export function App() {
     const s = mttSimple;
     const rake = s.entryFee * (s.rakePct / 100);
     const buyIn = s.entryFee - rake;
-    const prizePool = buyIn * s.totalEntries;
+    const prizePool = buyIn * s.totalEntries * (s.payoutRate / 100);
     const totalChips = s.startingChips * s.totalEntries;
 
     const selectedPreset = MTT_PAYOUT_PRESETS.find(
